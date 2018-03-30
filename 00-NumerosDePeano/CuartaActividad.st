@@ -125,6 +125,19 @@ previous: peanoNumber
 <= aPeanoNumber
 	aPeanoNumber = I ifTrue:[^self = I] ifFalse:[^self previous <= aPeanoNumber previous]! !
 
+!II class methodsFor: 'nil' stamp: 'PB 3/29/2018 21:32:59'!
+removeAllSubsequent
+next = nil
+ifTrue:[]
+ifFalse:[
+	self next removeAllSubsequent.
+	self next removeFromSystem.
+	next := nil.
+	]
+
+
+! !
+
 II instVarNamed: 'next' put: III!
 II instVarNamed: 'previous' put: I!
 
@@ -141,15 +154,15 @@ DenotativeObject subclass: #III
 III class
 	instanceVariableNames: 'next previous'!
 
-!III class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
+!III class methodsFor: 'as yet unclassified' stamp: 'PB 3/29/2018 21:39:08'!
 descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor
 	^'No se puede dividir por un numero mayor'! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
+!III class methodsFor: 'as yet unclassified' stamp: 'PB 3/29/2018 21:39:08'!
 descripcionDeErrorDeNumerosNegativosNoSoportados
 	^'Numeros negativos no soportados'! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
+!III class methodsFor: 'as yet unclassified' stamp: 'PB 3/29/2018 21:39:08'!
 next
 	next = nil ifTrue: [
 		next := self cloneNamed: self name , 'I'.
@@ -159,30 +172,30 @@ next
 	
 	! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
+!III class methodsFor: 'as yet unclassified' stamp: 'PB 3/29/2018 21:39:08'!
 previous
 	^previous! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
+!III class methodsFor: 'as yet unclassified' stamp: 'PB 3/29/2018 21:39:08'!
 previous: peanoNumber
 	previous:=peanoNumber! !
 
 
-!III class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
+!III class methodsFor: 'nil' stamp: 'PB 3/29/2018 21:39:08'!
 * aPeanoNumber
 
 	^self + (previous * aPeanoNumber) ! !
 
-!III class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
+!III class methodsFor: 'nil' stamp: 'PB 3/29/2018 21:39:08'!
 + aPeanoNumber
 	^self previous + aPeanoNumber next! !
 
-!III class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
+!III class methodsFor: 'nil' stamp: 'PB 3/29/2018 21:39:08'!
 - aPeanoNumber
 	aPeanoNumber = I ifTrue: [^self previous] ifFalse:[^self previous - aPeanoNumber previous]
 	! !
 
-!III class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
+!III class methodsFor: 'nil' stamp: 'PB 3/29/2018 21:39:08'!
 / aPeanoNumber
 	| | 
 	self <= aPeanoNumber 
@@ -202,171 +215,22 @@ previous: peanoNumber
 				]
 			]! !
 
-!III class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
+!III class methodsFor: 'nil' stamp: 'PB 3/29/2018 21:39:08'!
 <= aPeanoNumber
 	aPeanoNumber = I ifTrue:[^self = I] ifFalse:[^self previous <= aPeanoNumber previous]! !
 
-III instVarNamed: 'next' put: IIII!
+!III class methodsFor: 'nil' stamp: 'PB 3/29/2018 21:39:08'!
+removeAllSubsequent
+next = nil
+ifTrue:[]
+ifFalse:[
+	self next removeAllSubsequent.
+	self next removeFromSystem.
+	next := nil.
+	]
+
+
+! !
+
+III instVarNamed: 'next' put: nil!
 III instVarNamed: 'previous' put: II!
-
-!classDefinition: #IIII category: #'Cuarta Actividad'!
-DenotativeObject subclass: #IIII
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Cuarta Actividad'!
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'IIII class' category: #'Cuarta Actividad'!
-IIII class
-	instanceVariableNames: 'next previous'!
-
-!IIII class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
-descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor
-	^'No se puede dividir por un numero mayor'! !
-
-!IIII class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
-descripcionDeErrorDeNumerosNegativosNoSoportados
-	^'Numeros negativos no soportados'! !
-
-!IIII class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
-next
-	next = nil ifTrue: [
-		next := self cloneNamed: self name , 'I'.
-		next previous: self.
-		].
-	^next
-	
-	! !
-
-!IIII class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
-previous
-	^previous! !
-
-!IIII class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
-previous: peanoNumber
-	previous:=peanoNumber! !
-
-
-!IIII class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
-* aPeanoNumber
-
-	^self + (previous * aPeanoNumber) ! !
-
-!IIII class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
-+ aPeanoNumber
-	^self previous + aPeanoNumber next! !
-
-!IIII class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
-- aPeanoNumber
-	aPeanoNumber = I ifTrue: [^self previous] ifFalse:[^self previous - aPeanoNumber previous]
-	! !
-
-!IIII class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
-/ aPeanoNumber
-	| | 
-	self <= aPeanoNumber 
-		ifTrue:[
-			aPeanoNumber <= self
-				ifTrue:[^I]
-				ifFalse:[self error:self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor]
-			] 
-		ifFalse: [
-			| divisionParcial resta|
-			resta:=self - aPeanoNumber.
-			resta <= aPeanoNumber
-				ifTrue:[^I]
-				ifFalse:[
-					divisionParcial := resta / aPeanoNumber.
-					^divisionParcial next
-				]
-			]! !
-
-!IIII class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
-<= aPeanoNumber
-	aPeanoNumber = I ifTrue:[^self = I] ifFalse:[^self previous <= aPeanoNumber previous]! !
-
-IIII instVarNamed: 'next' put: IIIII!
-IIII instVarNamed: 'previous' put: III!
-
-!classDefinition: #IIIII category: #'Cuarta Actividad'!
-DenotativeObject subclass: #IIIII
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Cuarta Actividad'!
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'IIIII class' category: #'Cuarta Actividad'!
-IIIII class
-	instanceVariableNames: 'next previous'!
-
-!IIIII class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
-descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor
-	^'No se puede dividir por un numero mayor'! !
-
-!IIIII class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
-descripcionDeErrorDeNumerosNegativosNoSoportados
-	^'Numeros negativos no soportados'! !
-
-!IIIII class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
-next
-	next = nil ifTrue: [
-		next := self cloneNamed: self name , 'I'.
-		next previous: self.
-		].
-	^next
-	
-	! !
-
-!IIIII class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
-previous
-	^previous! !
-
-!IIIII class methodsFor: 'as yet unclassified' stamp: 'PO 3/29/2018 19:49:53'!
-previous: peanoNumber
-	previous:=peanoNumber! !
-
-
-!IIIII class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
-* aPeanoNumber
-
-	^self + (previous * aPeanoNumber) ! !
-
-!IIIII class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
-+ aPeanoNumber
-	^self previous + aPeanoNumber next! !
-
-!IIIII class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
-- aPeanoNumber
-	aPeanoNumber = I ifTrue: [^self previous] ifFalse:[^self previous - aPeanoNumber previous]
-	! !
-
-!IIIII class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
-/ aPeanoNumber
-	| | 
-	self <= aPeanoNumber 
-		ifTrue:[
-			aPeanoNumber <= self
-				ifTrue:[^I]
-				ifFalse:[self error:self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor]
-			] 
-		ifFalse: [
-			| divisionParcial resta|
-			resta:=self - aPeanoNumber.
-			resta <= aPeanoNumber
-				ifTrue:[^I]
-				ifFalse:[
-					divisionParcial := resta / aPeanoNumber.
-					^divisionParcial next
-				]
-			]! !
-
-!IIIII class methodsFor: 'nil' stamp: 'PO 3/29/2018 19:49:53'!
-<= aPeanoNumber
-	aPeanoNumber = I ifTrue:[^self = I] ifFalse:[^self previous <= aPeanoNumber previous]! !
-
-IIIII instVarNamed: 'next' put: nil!
-IIIII instVarNamed: 'previous' put: IIII!
