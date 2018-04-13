@@ -8,71 +8,80 @@ Error subclass: #NotFound
 
 !classDefinition: #IdiomTest category: #'CodigoRepetido-Ejercicio'!
 TestCase subclass: #IdiomTest
-	instanceVariableNames: ''
+	instanceVariableNames: 'customerBook'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'CodigoRepetido-Ejercicio'!
 
-!IdiomTest methodsFor: 'testing' stamp: 'HAW 4/14/2017 16:56:37'!
-test01AddingCustomerShouldNotTakeMoreThan50Milliseconds
+!IdiomTest methodsFor: 'testing' stamp: 'PO 4/12/2018 20:41:58'!
+assertDurationOfBlock: aBlock isLessThan: aDuration
 
-	| customerBook millisecondsBeforeRunning millisecondsAfterRunning |
+	| durationOfBlock |
 	
-	customerBook := CustomerBook  new.
+	durationOfBlock:= self getDurationOfBlock: aBlock.
 	
-	millisecondsBeforeRunning := Time millisecondClockValue.
-	customerBook addCustomerNamed: 'John Lennon'.
-	millisecondsAfterRunning := Time millisecondClockValue.
-	
-	self assert: (millisecondsAfterRunning-millisecondsBeforeRunning) < 50 
+	self assert: durationOfBlock < aDuration 
 	
 ! !
 
-!IdiomTest methodsFor: 'testing' stamp: 'HernanWilkinson 4/11/2016 20:29'!
+!IdiomTest methodsFor: 'testing' stamp: 'PO 4/12/2018 20:33:03'!
+getDurationOfBlock: aBlockClosure 
+	|millisecondsBeforeRunning millisecondsAfterRunning|
+	millisecondsBeforeRunning := Time millisecondClockValue.
+	aBlockClosure value.
+	millisecondsAfterRunning := Time millisecondClockValue.
+	^millisecondsAfterRunning - millisecondsBeforeRunning! !
+
+!IdiomTest methodsFor: 'testing' stamp: 'PO 4/12/2018 21:24:08'!
+on: aBlockClosure shouldRaise: anErrorClass asserting: assertions
+	aBlockClosure
+		on: anErrorClass 
+		do: assertions! !
+
+!IdiomTest methodsFor: 'testing' stamp: 'PO 4/12/2018 21:30:34'!
+setUp
+	customerBook := CustomerBook new! !
+
+!IdiomTest methodsFor: 'testing' stamp: 'PO 4/12/2018 21:31:10'!
+test01AddingCustomerShouldNotTakeMoreThan50Milliseconds
+	
+	self assertDurationOfBlock: [customerBook addCustomerNamed: 'John Lennon'.] isLessThan: 50	
+! !
+
+!IdiomTest methodsFor: 'testing' stamp: 'PO 4/12/2018 21:32:07'!
 test02RemovingCustomerShouldNotTakeMoreThan100Milliseconds
 
-	| customerBook millisecondsBeforeRunning millisecondsAfterRunning paulMcCartney |
+	| paulMcCartney |
 	
-	customerBook := CustomerBook  new.
 	paulMcCartney := 'Paul McCartney'.
-	
 	customerBook addCustomerNamed: paulMcCartney.
-	  
-	millisecondsBeforeRunning := Time millisecondClockValue.
-	customerBook removeCustomerNamed: paulMcCartney.
-	millisecondsAfterRunning := Time millisecondClockValue.
-	
-	self assert: (millisecondsAfterRunning-millisecondsBeforeRunning) < 100 
+		  
+	self assertDurationOfBlock:[customerBook removeCustomerNamed: paulMcCartney] isLessThan: 100.
 	
 ! !
 
-!IdiomTest methodsFor: 'testing' stamp: 'HernanWilkinson 5/9/2012 18:12'!
+!IdiomTest methodsFor: 'testing' stamp: 'PO 4/12/2018 21:36:30'!
 test03CanNotAddACustomerWithEmptyName 
 
-	| customerBook |
-			
-	customerBook := CustomerBook new.
-
-	[ customerBook addCustomerNamed: ''.
-	self fail ]
-		on: Error 
-		do: [ :anError | 
+	self on:[ customerBook addCustomerNamed: ''.
+		self fail ]
+		shouldRaise: Error
+		asserting: [ :anError | 
 			self assert: anError messageText = CustomerBook customerCanNotBeEmptyErrorMessage.
-			self assert: customerBook isEmpty ]! !
+			self assert: customerBook isEmpty ].! !
 
-!IdiomTest methodsFor: 'testing' stamp: 'HAW 8/28/2017 08:57:25'!
+!IdiomTest methodsFor: 'testing' stamp: 'PO 4/12/2018 21:32:50'!
 test04CanNotRemoveAnInvalidCustomer
 	
-	| customerBook johnLennon |
+	| johnLennon |
 			
-	customerBook := CustomerBook new.
 	johnLennon := 'John Lennon'.
 	customerBook addCustomerNamed: johnLennon.
 	
-	[ customerBook removeCustomerNamed: 'Paul McCartney'.
-	self fail ]
-		on: NotFound 
-		do: [ :anError | 
+	self on: [customerBook removeCustomerNamed: 'Paul McCartney'.
+		self fail ] 
+		shouldRaise: NotFound
+		asserting: [ :anError | 
 			self assert: customerBook numberOfCustomers = 1.
 			self assert: (customerBook includesCustomerNamed: johnLennon) ]
 ! !
