@@ -207,10 +207,34 @@ Object subclass: #Numero
 
 	self subclassResponsibility ! !
 
+!Numero methodsFor: 'arithmetic operations' stamp: 'PO 4/19/2018 20:32:01'!
+dividirEntero: anAdder
+	self subclassResponsibility.! !
+
+!Numero methodsFor: 'arithmetic operations' stamp: 'PO 4/19/2018 20:33:19'!
+dividirFraccion: anAdder
+	self subclassResponsibility.! !
+
 !Numero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 22:48'!
 invalidNumberType
 
 	self error: self class invalidNumberTypeErrorDescription! !
+
+!Numero methodsFor: 'arithmetic operations' stamp: 'PO 4/19/2018 20:32:25'!
+multiplicarPorEntero: anAdder
+	self subclassResponsibility.! !
+
+!Numero methodsFor: 'arithmetic operations' stamp: 'PO 4/19/2018 20:33:33'!
+multiplicarPorFraccion: anAdder
+	self subclassResponsibility ! !
+
+!Numero methodsFor: 'arithmetic operations' stamp: 'PO 4/19/2018 20:31:02'!
+sumarConEntero: anAdder
+	self subclassResponsibility ! !
+
+!Numero methodsFor: 'arithmetic operations' stamp: 'PO 4/19/2018 20:33:42'!
+sumarConFraccion: anAdder
+	self subclassResponsibility ! !
 
 
 !Numero methodsFor: 'testing' stamp: 'HernanWilkinson 5/7/2016 22:49'!
@@ -282,12 +306,9 @@ initalizeWith: aValue
 	value := aValue! !
 
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'P 4/16/2018 21:34:15'!
-* aMultiplier 
-	
-	^aMultiplier multiplyWithEntero: self 
-	"^self class with: value * aMultiplier integerValue"
-	! !
+!Entero methodsFor: 'arithmetic operations' stamp: 'PO 4/19/2018 20:18:12'!
+* aMultiplier
+	^ aMultiplier multiplicarPorEntero: self"^self class with: value * aMultiplier integerValue".! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'P 4/16/2018 21:01:33'!
 + anAdder 
@@ -323,14 +344,13 @@ dividirFraccion: dividendoFraccion
 		with: dividendoFraccion numerator
 		over: self * dividendoFraccion denominator.! !
 
-!Entero methodsFor: 'as yet unclassified' stamp: 'PB 4/16/2018 21:58:27'!
-multiplyWithEntero: anEntero 
-	^self class with: self integerValue * anEntero integerValue! !
+!Entero methodsFor: 'as yet unclassified' stamp: 'PO 4/19/2018 20:18:12'!
+multiplicarPorEntero: anEntero
+	^ self class with: self integerValue * anEntero integerValue.! !
 
-!Entero methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:40:03'!
-multiplyWithFraccion: aFraccion 
-	^(aFraccion numerator * self) / (aFraccion denominator)
-! !
+!Entero methodsFor: 'as yet unclassified' stamp: 'PO 4/19/2018 20:19:32'!
+multiplicarPorFraccion: aFraccion
+	^ aFraccion numerator * self / aFraccion denominator.! !
 
 !Entero methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:10:53'!
 sumaConEntero: anEntero 
@@ -397,10 +417,9 @@ hash
 	^(numerator hash / denominator hash) hash! !
 
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'P 4/16/2018 21:40:32'!
-* aMultiplier 
-	
-	^aMultiplier multiplyWithFraccion: self	! !
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'PO 4/19/2018 20:19:32'!
+* aMultiplier
+	^ aMultiplier multiplicarPorFraccion: self.! !
 
 !Fraccion methodsFor: 'arithmetic operations' stamp: 'P 4/16/2018 21:17:01'!
 + anAdder 
@@ -432,14 +451,15 @@ dividirEntero: dividendo
 dividirFraccion: dividendoFraccion
 	^(dividendoFraccion numerator * self denominator) / (dividendoFraccion denominator * self numerator)! !
 
-!Fraccion methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:33:45'!
-multiplyWithEntero: anEntero 
-	^Fraccion with: (self numerator * anEntero) over: self denominator! !
+!Fraccion methodsFor: 'as yet unclassified' stamp: 'PO 4/19/2018 20:18:12'!
+multiplicarPorEntero: anEntero
+	^ Fraccion
+		with: self numerator * anEntero
+		over: self denominator.! !
 
-!Fraccion methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:45:09'!
-multiplyWithFraccion: aFraccion 
-		^(numerator * aFraccion numerator) / (denominator * aFraccion denominator)
-! !
+!Fraccion methodsFor: 'as yet unclassified' stamp: 'PO 4/19/2018 20:19:32'!
+multiplicarPorFraccion: aFraccion
+	^ numerator * aFraccion numerator / (denominator * aFraccion denominator).! !
 
 !Fraccion methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:08:16'!
 sumaConEntero: anEntero 
@@ -462,7 +482,7 @@ sumaConFraccion: aFraccion
 Fraccion class
 	instanceVariableNames: ''!
 
-!Fraccion class methodsFor: 'intance creation' stamp: 'HernanWilkinson 5/7/2016 20:41'!
+!Fraccion class methodsFor: 'intance creation' stamp: 'PO 4/19/2018 20:56:05'!
 with: aDividend over: aDivisor
 
 	| greatestCommonDivisor numerator denominator |
@@ -470,7 +490,8 @@ with: aDividend over: aDivisor
 	aDivisor isZero ifTrue: [ self error: self canNotDivideByZeroErrorDescription ].
 	aDividend isZero ifTrue: [ ^aDividend ].
 	
-	greatestCommonDivisor := aDividend greatestCommonDivisorWith: aDivisor. 
+	
+	greatestCommonDivisor := aDividend greatestCommonDivisorWith: aDivisor.
 	numerator := aDividend // greatestCommonDivisor.
 	denominator := aDivisor // greatestCommonDivisor.
 	
