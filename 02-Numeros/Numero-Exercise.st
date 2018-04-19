@@ -295,10 +295,10 @@ initalizeWith: aValue
 	^anAdder sumaConEntero: (self value)
 ! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 23:14'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'PO 4/19/2018 19:17:12'!
 / aDivisor 
-	
-	^Fraccion with: self over: aDivisor! !
+	"Fraccion with: self over: aDivisor"
+	^aDivisor dividirEntero: self value! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 21:55'!
 // aDivisor 
@@ -310,6 +310,18 @@ greatestCommonDivisorWith: anEntero
 	
 	^self class with: (value gcd: anEntero integerValue)! !
 
+
+!Entero methodsFor: 'as yet unclassified' stamp: 'PO 4/19/2018 19:30:22'!
+dividirEntero: dividendo
+	^ Fraccion
+		with: dividendo
+		over: self.! !
+
+!Entero methodsFor: 'as yet unclassified' stamp: 'PO 4/19/2018 19:30:43'!
+dividirFraccion: dividendoFraccion
+	^ Fraccion
+		with: dividendoFraccion numerator
+		over: self * dividendoFraccion denominator.! !
 
 !Entero methodsFor: 'as yet unclassified' stamp: 'PB 4/16/2018 21:58:27'!
 multiplyWithEntero: anEntero 
@@ -395,10 +407,10 @@ hash
 	
 	^anAdder sumaConFraccion: self! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 23:14'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'PO 4/19/2018 18:53:56'!
 / aDivisor 
-	
-	^(numerator * aDivisor denominator) / (denominator * aDivisor numerator)! !
+	"(numerator * aDivisor denominator) / (denominator * aDivisor numerator)"
+	^aDivisor dividirFraccion: self! !
 
 
 !Fraccion methodsFor: 'accessing' stamp: 'HernanWilkinson 5/7/2016 21:56'!
@@ -411,6 +423,14 @@ numerator
 
 	^ numerator! !
 
+
+!Fraccion methodsFor: 'as yet unclassified' stamp: 'PO 4/19/2018 18:51:48'!
+dividirEntero: dividendo
+	^Fraccion with: self denominator * dividendo over: self numerator! !
+
+!Fraccion methodsFor: 'as yet unclassified' stamp: 'PO 4/19/2018 18:55:23'!
+dividirFraccion: dividendoFraccion
+	^(dividendoFraccion numerator * self denominator) / (dividendoFraccion denominator * self numerator)! !
 
 !Fraccion methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:33:45'!
 multiplyWithEntero: anEntero 
