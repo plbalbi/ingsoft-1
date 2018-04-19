@@ -223,7 +223,6 @@ isZero
 
 	self subclassResponsibility ! !
 
-
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Numero class' category: #'Numero-Exercise'!
@@ -283,16 +282,17 @@ initalizeWith: aValue
 	value := aValue! !
 
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 23:13'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'P 4/16/2018 21:34:15'!
 * aMultiplier 
 	
-	^self class with: value * aMultiplier integerValue
+	^aMultiplier multiplyWithEntero: self 
+	"^self class with: value * aMultiplier integerValue"
 	! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 23:13'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'P 4/16/2018 21:01:33'!
 + anAdder 
 	
-	^self class with: value + anAdder integerValue
+	^anAdder sumaConEntero: (self value)
 ! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 23:14'!
@@ -310,6 +310,25 @@ greatestCommonDivisorWith: anEntero
 	
 	^self class with: (value gcd: anEntero integerValue)! !
 
+
+!Entero methodsFor: 'as yet unclassified' stamp: 'PB 4/16/2018 21:58:27'!
+multiplyWithEntero: anEntero 
+	^self class with: self integerValue * anEntero integerValue! !
+
+!Entero methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:40:03'!
+multiplyWithFraccion: aFraccion 
+	^(aFraccion numerator * self) / (aFraccion denominator)
+! !
+
+!Entero methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:10:53'!
+sumaConEntero: anEntero 
+	^self class with: self integerValue + anEntero integerValue! !
+
+!Entero methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:29:02'!
+sumaConFraccion: aFraccion
+	|newNumerator|
+	newNumerator := (aFraccion denominator * self) +aFraccion numerator.
+	^Fraccion with: newNumerator over: aFraccion denominator! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -366,22 +385,15 @@ hash
 	^(numerator hash / denominator hash) hash! !
 
 
-
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 23:14'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'P 4/16/2018 21:40:32'!
 * aMultiplier 
 	
-	^(numerator * aMultiplier numerator) / (denominator * aMultiplier denominator)
-	! !
+	^aMultiplier multiplyWithFraccion: self	! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 23:14'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'P 4/16/2018 21:17:01'!
 + anAdder 
 	
-	| newNumerator newDenominator |
-	
-	newNumerator := (numerator * anAdder denominator) + (denominator * anAdder numerator).
-	newDenominator := denominator * anAdder denominator.
-	
-	^newNumerator / newDenominator ! !
+	^anAdder sumaConFraccion: self! !
 
 !Fraccion methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 23:14'!
 / aDivisor 
@@ -398,6 +410,31 @@ denominator
 numerator
 
 	^ numerator! !
+
+
+!Fraccion methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:33:45'!
+multiplyWithEntero: anEntero 
+	^Fraccion with: (self numerator * anEntero) over: self denominator! !
+
+!Fraccion methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:45:09'!
+multiplyWithFraccion: aFraccion 
+		^(numerator * aFraccion numerator) / (denominator * aFraccion denominator)
+! !
+
+!Fraccion methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:08:16'!
+sumaConEntero: anEntero 
+	|newNumerator|
+	newNumerator := (self denominator * anEntero) +self numerator.
+	^Fraccion with: newNumerator over: self denominator! !
+
+!Fraccion methodsFor: 'as yet unclassified' stamp: 'P 4/16/2018 21:18:57'!
+sumaConFraccion: aFraccion 
+	| newNumerator newDenominator |
+	
+	newNumerator := (numerator * aFraccion denominator) + (denominator * aFraccion numerator).
+	newDenominator := denominator * aFraccion denominator.
+	
+	^self class with: newNumerator over: newDenominator! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
