@@ -139,10 +139,30 @@ test10CanNotTopWhenThereAreNoObjectsInTheStack
 
 !classDefinition: #OOStack category: #'Stack-Exercise'!
 Object subclass: #OOStack
-	instanceVariableNames: ''
+	instanceVariableNames: 'firstElement'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
+
+!OOStack methodsFor: 'info' stamp: 'P 4/23/2018 20:26:36'!
+isEmpty
+
+	^firstElement = nil! !
+
+
+!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 20:33:59'!
+pop
+| poppedElement |
+	poppedElement := firstElement value.
+	firstElement := nil.
+	^poppedElement 
+	! !
+
+!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 20:31:34'!
+push: anObject
+| objectContainer |
+	objectContainer  := OOStackElement new: anObject.
+	firstElement  := objectContainer .! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -154,3 +174,29 @@ OOStack class
 stackEmptyErrorDescription
 	
 	^ 'Stack is empty'! !
+
+
+!classDefinition: #OOStackElement category: #'Stack-Exercise'!
+Object subclass: #OOStackElement
+	instanceVariableNames: 'element'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Stack-Exercise'!
+
+!OOStackElement methodsFor: 'accessing' stamp: 'P 4/23/2018 20:24:35'!
+contain: anElement
+	element  := anElement! !
+
+!OOStackElement methodsFor: 'accessing' stamp: 'P 4/23/2018 20:32:29'!
+value
+	^element ! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'OOStackElement class' category: #'Stack-Exercise'!
+OOStackElement class
+	instanceVariableNames: ''!
+
+!OOStackElement class methodsFor: 'instance creation' stamp: 'P 4/23/2018 20:23:26'!
+new: anElement
+	^self super new contain: anElement ! !
