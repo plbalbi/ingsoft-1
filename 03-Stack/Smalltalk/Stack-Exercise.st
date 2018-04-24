@@ -91,7 +91,7 @@ test07TopDoesNotRemoveObjectFromStack
 	self assert: stack size = 1.
 	! !
 
-!OOStackTest methodsFor: 'test' stamp: 'HAW 4/14/2017 22:48:26'!
+!OOStackTest methodsFor: 'test' stamp: 'P 4/23/2018 21:44:44'!
 test08CanNotPopWhenThereAreNoObjectsInTheStack
 
 	| stack  |
@@ -101,7 +101,7 @@ test08CanNotPopWhenThereAreNoObjectsInTheStack
 		should: [ stack pop ]
 		raise: Error - MessageNotUnderstood 
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = OOStack stackEmptyErrorDescription ]
+			self assert: (anError messageText = OOStack stackEmptyErrorDescription) ]
 		
 ! !
 
@@ -122,11 +122,11 @@ test09CanNotPopWhenThereAreNoObjectsInTheStackAndTheStackHadObjects
 		
 ! !
 
-!OOStackTest methodsFor: 'test' stamp: 'HAW 4/14/2017 22:48:44'!
+!OOStackTest methodsFor: 'test' stamp: 'P 4/23/2018 21:47:22'!
 test10CanNotTopWhenThereAreNoObjectsInTheStack
 
-	| stack  |
-	
+	| stack |
+		
 	stack := OOStack new.
 	self
 		should: [ stack top ]
@@ -149,14 +149,19 @@ isEmpty
 
 	^firstElement = nil! !
 
+!OOStack methodsFor: 'info' stamp: 'P 4/23/2018 21:48:11'!
+raiseExceptionIfEmpty
+	self isEmpty ifTrue: [Error signal: OOStack stackEmptyErrorDescription].! !
+
 !OOStack methodsFor: 'info' stamp: 'P 4/23/2018 20:52:52'!
 size
 	^1! !
 
 
-!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 20:59:54'!
+!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 21:48:28'!
 pop
 | poppedElement |
+	self raiseExceptionIfEmpty.
 	poppedElement := firstElement value.
 	firstElement hasNext 
 		ifFalse: [
@@ -183,8 +188,9 @@ push: anObject
 		]
 	! !
 
-!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 20:52:22'!
+!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 21:48:40'!
 top
+	self raiseExceptionIfEmpty.
 	^firstElement value! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
