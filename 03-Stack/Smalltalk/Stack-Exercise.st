@@ -149,20 +149,43 @@ isEmpty
 
 	^firstElement = nil! !
 
+!OOStack methodsFor: 'info' stamp: 'P 4/23/2018 20:52:52'!
+size
+	^1! !
 
-!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 20:33:59'!
+
+!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 20:59:54'!
 pop
 | poppedElement |
 	poppedElement := firstElement value.
-	firstElement := nil.
+	firstElement hasNext 
+		ifFalse: [
+			firstElement := nil.
+			] 
+		ifTrue: [
+			firstElement := firstElement next.
+			].
+	
 	^poppedElement 
 	! !
 
-!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 20:31:34'!
+!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 20:57:35'!
 push: anObject
 | objectContainer |
 	objectContainer  := OOStackElement new: anObject.
-	firstElement  := objectContainer .! !
+	self isEmpty 
+	ifTrue: [
+		firstElement  := objectContainer.
+		]
+	ifFalse: [
+		objectContainer setFollowing: firstElement .
+		firstElement := objectContainer .
+		]
+	! !
+
+!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 20:52:22'!
+top
+	^firstElement value! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -178,7 +201,7 @@ stackEmptyErrorDescription
 
 !classDefinition: #OOStackElement category: #'Stack-Exercise'!
 Object subclass: #OOStackElement
-	instanceVariableNames: 'element'
+	instanceVariableNames: 'element next'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
@@ -187,9 +210,22 @@ Object subclass: #OOStackElement
 contain: anElement
 	element  := anElement! !
 
+!OOStackElement methodsFor: 'accessing' stamp: 'P 4/23/2018 21:03:10'!
+next
+	^next! !
+
+!OOStackElement methodsFor: 'accessing' stamp: 'P 4/23/2018 20:55:08'!
+setFollowing: anOOStackElement
+	next  := anOOStackElement ! !
+
 !OOStackElement methodsFor: 'accessing' stamp: 'P 4/23/2018 20:32:29'!
 value
 	^element ! !
+
+
+!OOStackElement methodsFor: 'info' stamp: 'P 4/23/2018 21:02:04'!
+hasNext
+	^next ~= nil! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -197,6 +233,6 @@ value
 OOStackElement class
 	instanceVariableNames: ''!
 
-!OOStackElement class methodsFor: 'instance creation' stamp: 'P 4/23/2018 20:23:26'!
+!OOStackElement class methodsFor: 'instance creation' stamp: 'P 4/23/2018 20:41:07'!
 new: anElement
-	^self super new contain: anElement ! !
+	^self new contain: anElement ! !
