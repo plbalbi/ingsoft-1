@@ -144,54 +144,41 @@ Object subclass: #OOStack
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!OOStack methodsFor: 'info' stamp: 'P 4/23/2018 20:26:36'!
+!OOStack methodsFor: 'info' stamp: 'PO 4/26/2018 14:18:00'!
 isEmpty
 
-	^firstElement = nil! !
+	^firstElement class = OOStackBase! !
 
-!OOStack methodsFor: 'info' stamp: 'P 4/23/2018 21:48:11'!
-raiseExceptionIfEmpty
-	self isEmpty ifTrue: [Error signal: OOStack stackEmptyErrorDescription].! !
-
-!OOStack methodsFor: 'info' stamp: 'P 4/23/2018 20:52:52'!
+!OOStack methodsFor: 'info' stamp: 'PO 4/26/2018 14:33:52'!
 size
-	^1! !
+	^firstElement count! !
 
 
-!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 21:48:28'!
+!OOStack methodsFor: 'accessing' stamp: 'PO 4/26/2018 14:21:36'!
 pop
 | poppedElement |
-	self raiseExceptionIfEmpty.
 	poppedElement := firstElement value.
-	firstElement hasNext 
-		ifFalse: [
-			firstElement := nil.
-			] 
-		ifTrue: [
-			firstElement := firstElement next.
-			].
+	firstElement := firstElement next.	
 	
 	^poppedElement 
 	! !
 
-!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 20:57:35'!
+!OOStack methodsFor: 'accessing' stamp: 'PO 4/26/2018 14:28:03'!
 push: anObject
-| objectContainer |
-	objectContainer  := OOStackElement new: anObject.
-	self isEmpty 
-	ifTrue: [
-		firstElement  := objectContainer.
-		]
-	ifFalse: [
-		objectContainer setFollowing: firstElement .
-		firstElement := objectContainer .
-		]
-	! !
+	| objectContainer |
+	objectContainer _ OOStackCell new: anObject.
+	
+	objectContainer setFollowing: firstElement.
+	firstElement _ objectContainer.! !
 
-!OOStack methodsFor: 'accessing' stamp: 'P 4/23/2018 21:48:40'!
+!OOStack methodsFor: 'accessing' stamp: 'PO 4/26/2018 14:30:57'!
 top
-	self raiseExceptionIfEmpty.
 	^firstElement value! !
+
+
+!OOStack methodsFor: 'setter' stamp: 'PO 4/26/2018 14:17:15'!
+setFirstElement: anOOStackBase 
+	 firstElement := anOOStackBase! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -204,41 +191,97 @@ stackEmptyErrorDescription
 	
 	^ 'Stack is empty'! !
 
+
+!OOStack class methodsFor: 'as yet unclassified' stamp: 'PO 4/26/2018 14:15:14'!
+new
+|newStack|
+	newStack := super new.
+	newStack setFirstElement: OOStackBase new.
+	^newStack! !
+
 
-!classDefinition: #OOStackElement category: #'Stack-Exercise'!
-Object subclass: #OOStackElement
+!classDefinition: #OOStackBase category: #'Stack-Exercise'!
+Object subclass: #OOStackBase
 	instanceVariableNames: 'element next'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!OOStackElement methodsFor: 'accessing' stamp: 'P 4/23/2018 20:24:35'!
+!OOStackBase methodsFor: 'info' stamp: 'PO 4/26/2018 14:06:33'!
+hasNext
+	^nil! !
+
+
+!OOStackBase methodsFor: 'accessing' stamp: 'PO 4/26/2018 14:03:20'!
+contain: anElement
+	self error:'Cannot set element of base'! !
+
+!OOStackBase methodsFor: 'accessing' stamp: 'PO 4/26/2018 14:07:33'!
+next
+	self error:'Cannot pop empty stack'! !
+
+!OOStackBase methodsFor: 'accessing' stamp: 'PO 4/26/2018 14:05:49'!
+setFollowing: anOOStackCell
+	self error: 'Cannot set next of base'
+	! !
+
+!OOStackBase methodsFor: 'accessing' stamp: 'PO 4/26/2018 14:20:49'!
+value
+	Error signal: OOStack stackEmptyErrorDescription! !
+
+
+!OOStackBase methodsFor: 'auxiliar' stamp: 'PO 4/26/2018 14:36:23'!
+count
+	^0! !
+
+!OOStackBase methodsFor: 'auxiliar' stamp: 'PO 4/26/2018 14:36:19'!
+count: previousSum
+	^previousSum! !
+
+
+!classDefinition: #OOStackCell category: #'Stack-Exercise'!
+Object subclass: #OOStackCell
+	instanceVariableNames: 'element next'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Stack-Exercise'!
+
+!OOStackCell methodsFor: 'accessing' stamp: 'P 4/23/2018 20:24:35'!
 contain: anElement
 	element  := anElement! !
 
-!OOStackElement methodsFor: 'accessing' stamp: 'P 4/23/2018 21:03:10'!
+!OOStackCell methodsFor: 'accessing' stamp: 'P 4/23/2018 21:03:10'!
 next
 	^next! !
 
-!OOStackElement methodsFor: 'accessing' stamp: 'P 4/23/2018 20:55:08'!
+!OOStackCell methodsFor: 'accessing' stamp: 'P 4/23/2018 20:55:08'!
 setFollowing: anOOStackElement
 	next  := anOOStackElement ! !
 
-!OOStackElement methodsFor: 'accessing' stamp: 'P 4/23/2018 20:32:29'!
+!OOStackCell methodsFor: 'accessing' stamp: 'P 4/23/2018 20:32:29'!
 value
 	^element ! !
 
 
-!OOStackElement methodsFor: 'info' stamp: 'P 4/23/2018 21:02:04'!
+!OOStackCell methodsFor: 'info' stamp: 'P 4/23/2018 21:02:04'!
 hasNext
 	^next ~= nil! !
 
+
+!OOStackCell methodsFor: 'auxiliar' stamp: 'PO 4/26/2018 14:35:11'!
+count
+	^next count:1! !
+
+!OOStackCell methodsFor: 'auxiliar' stamp: 'PO 4/26/2018 14:35:40'!
+count: previousSum
+	^next count:(previousSum+1)! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'OOStackElement class' category: #'Stack-Exercise'!
-OOStackElement class
+!classDefinition: 'OOStackCell class' category: #'Stack-Exercise'!
+OOStackCell class
 	instanceVariableNames: ''!
 
-!OOStackElement class methodsFor: 'instance creation' stamp: 'P 4/23/2018 20:41:07'!
+!OOStackCell class methodsFor: 'instance creation' stamp: 'P 4/23/2018 20:41:07'!
 new: anElement
 	^self new contain: anElement ! !
