@@ -447,10 +447,21 @@ transactions
 			accumTransactions union: currManagee transactions.
 		]! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:40'!
+!Portfolio methodsFor: 'transactions' stamp: 'P 5/7/2018 21:59:14'!
 transactionsOf: anAccount 
-
-	self shouldBeImplemented ! !
+	"Paulo -> leer esto: Esto esta hecho recontra cabeza, horibble, asco
+	Pero alta paja arregarlo ahora... to later"
+	^(managedPortfolios  detect: [ :managee |
+		(managee isKindOf: Portfolio) ifTrue: [
+				| found |
+				found := managee transactionsOf: anAccount .
+				found notNil
+			] ifFalse: [
+				managee  = anAccount 
+			].
+		] ifNone: [nil]) transactions
+	
+! !
 
 
 !Portfolio methodsFor: 'instance creation' stamp: 'P 5/7/2018 21:35:56'!
