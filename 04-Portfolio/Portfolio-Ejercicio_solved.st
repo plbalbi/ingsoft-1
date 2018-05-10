@@ -447,18 +447,28 @@ transactions
 			accumTransactions union: currManagee transactions.
 		]! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'P 5/10/2018 00:45:59'!
+!Portfolio methodsFor: 'transactions' stamp: 'P 5/10/2018 01:09:23'!
 transactionsOf: anAccount
+"""
+Nota: Aca debe fallar en cuanto el objeto receptor del mensaje no maneje la cuenta solicitada...
+Como que de alguna forma debería estar implicito el self manages: anAccount. Algo parecido 
+al inicializar con dos cuentas o más, que al ya estar managgeadas, debe fallar. Quizas con 
+algún adapter, o algo que catchee el envío del mensaje.
+"""
 	 (self manages: anAccount) ifFalse: [
 		Error signal: Portfolio accountNotManagedMessageDescription.
 		].
 	^anAccount transactions! !
 
 
-!Portfolio methodsFor: 'instance creation' stamp: 'P 5/7/2018 21:35:56'!
+!Portfolio methodsFor: 'initialization' stamp: 'P 5/10/2018 01:01:37'!
+initialize
+	super initialize.
+	managedPortfolios := OrderedCollection new.! !
+
+!Portfolio methodsFor: 'initialization' stamp: 'P 5/10/2018 01:05:48'!
 manageAccountsFrom: anAccountsCollections
-	managedPortfolios := OrderedCollection  new.
-	anAccountsCollections do: [ :account | self manage: account]! !
+	managedPortfolios addAll: anAccountsCollections! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -466,8 +476,11 @@ manageAccountsFrom: anAccountsCollections
 Portfolio class
 	instanceVariableNames: ''!
 
-!Portfolio class methodsFor: 'instance creation' stamp: 'P 5/10/2018 00:51:37'!
+!Portfolio class methodsFor: 'instance creation' stamp: 'P 5/10/2018 01:10:08'!
 with: anAccount1 with: anAccount2
+"""
+Lo mencionado en transactionsOf:
+"""
 	(anAccount1 = anAccount2) ifTrue: [
 			Error signal: Portfolio accountAlreadyManagedErrorMessage.
 		].
