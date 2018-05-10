@@ -414,24 +414,17 @@ balance
 	^(managedPortfolios collect: [ :account | account balance ]) sum! !
 
 
-!Portfolio methodsFor: 'testing' stamp: 'P 5/7/2018 21:37:57'!
-manage: anAccount
-	managedPortfolios add: anAccount 
-	
-! !
-
-!Portfolio methodsFor: 'testing' stamp: 'P 5/7/2018 21:52:23'!
+!Portfolio methodsFor: 'testing' stamp: 'P 5/10/2018 16:56:54'!
 manages: anAccount
-	^managedPortfolios  anySatisfy: [ :managee |
-		(managee isKindOf: Portfolio) ifTrue: [
-			(anAccount isKindOf: Portfolio) ifTrue: [
-					managee = anAccount.				
-				] ifFalse: [
-					managee manages: anAccount.				
-				].
-			] ifFalse: [
-				managee  = anAccount 
-			].
+"""
+Ideally, i would want sth like:
+	managedPortfolios anySatisfy: [ :managee | 
+			managee manages: anAccount
+		]
+"""
+	^managedPortfolios anySatisfy: [ :managee |
+		"I know that managee is managed by self, so, if managee manages anAccount => self manages: anAccount"
+		(managee = anAccount) or: (managee manages: anAccount).
 		]
 	
 ! !
@@ -469,6 +462,13 @@ initialize
 !Portfolio methodsFor: 'initialization' stamp: 'P 5/10/2018 01:05:48'!
 manageAccountsFrom: anAccountsCollections
 	managedPortfolios addAll: anAccountsCollections! !
+
+
+!Portfolio methodsFor: 'accounting' stamp: 'P 5/7/2018 21:37:57'!
+manage: anAccount
+	managedPortfolios add: anAccount 
+	
+! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
