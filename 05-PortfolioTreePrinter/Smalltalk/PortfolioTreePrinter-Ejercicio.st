@@ -544,10 +544,15 @@ Object subclass: #AccountTransaction
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!AccountTransaction methodsFor: 'evaluating' stamp: 'HernanWilkinson 7/14/2011 06:48'!
-value
 
+!AccountTransaction methodsFor: 'evaluating' stamp: 'P 5/10/2018 19:46:45'!
+value
 	self subclassResponsibility ! !
+
+
+!AccountTransaction methodsFor: 'as yet unclassified' stamp: 'P 5/10/2018 19:46:56'!
+balanceValue
+	^self value! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -627,10 +632,14 @@ initializeFor: aValue
 	value := aValue ! !
 
 
-!Withdraw methodsFor: 'value' stamp: 'HernanWilkinson 7/14/2011 05:54'!
+!Withdraw methodsFor: 'value' stamp: 'P 5/10/2018 19:46:04'!
+balanceValue
+	^self value * -1! !
+
+!Withdraw methodsFor: 'value' stamp: 'P 5/10/2018 19:44:01'!
 value
 
-	^ value ! !
+	^ value! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -682,6 +691,7 @@ transactions
 
 	self subclassResponsibility ! !
 
+
 
 !classDefinition: #Portfolio category: #'PortfolioTreePrinter-Ejercicio'!
 SummarizingAccount subclass: #Portfolio
@@ -689,6 +699,7 @@ SummarizingAccount subclass: #Portfolio
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
+
 
 !Portfolio methodsFor: 'testing' stamp: 'HAW 5/8/2018 16:46:26'!
 anyManagedAccountManages: anAccount 
@@ -729,10 +740,26 @@ transactionsOf: anAccount
 	! !
 
 
+!Portfolio methodsFor: 'initialization' stamp: 'P 5/10/2018 01:01:37'!
+initialize
+	super initialize.
+	managedPortfolios := OrderedCollection new.! !
+
 !Portfolio methodsFor: 'initialization' stamp: 'HernanWilkinson 7/13/2011 19:19'!
 initializeWithAll: aCollectionOfAccounts
 
 	accounts := aCollectionOfAccounts   ! !
+
+!Portfolio methodsFor: 'initialization' stamp: 'P 5/10/2018 01:05:48'!
+manageAccountsFrom: anAccountsCollections
+	managedPortfolios addAll: anAccountsCollections! !
+
+
+!Portfolio methodsFor: 'accounting' stamp: 'P 5/7/2018 21:37:57'!
+manage: anAccount
+	managedPortfolios add: anAccount 
+	
+! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -751,6 +778,7 @@ withAll: aCollectionOfAccounts
 	self checkCreationPreconditions: aCollectionOfAccounts.
 	
 	^self new initializeWithAll: aCollectionOfAccounts ! !
+
 
 
 !Portfolio class methodsFor: 'assertions' stamp: 'HernanWilkinson 9/18/2011 17:22'!
@@ -803,10 +831,10 @@ initialize
 	transactions := OrderedCollection new.! !
 
 
-!ReceptiveAccount methodsFor: 'transactions' stamp: 'HAW 9/25/2017 17:06:14'!
+!ReceptiveAccount methodsFor: 'transactions' stamp: 'P 5/10/2018 19:44:37'!
 balance
 
-	^ transactions inject: 0 into: [ :balance :transaction | balance + transaction value ]! !
+	^ transactions inject: 0 into: [ :balance :transaction | balance + transaction balanceValue]! !
 
 !ReceptiveAccount methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:37'!
 register: aTransaction
@@ -818,6 +846,7 @@ register: aTransaction
 transactions 
 
 	^ transactions copy! !
+
 
 
 !ReceptiveAccount methodsFor: 'testing' stamp: 'HernanWilkinson 7/13/2011 18:37'!
@@ -835,6 +864,70 @@ registers: aTtransaction
 
 !classDefinition: #Transfer category: #'PortfolioTreePrinter-Ejercicio'!
 Object subclass: #Transfer
+	instanceVariableNames: 'amount to from'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!Transfer methodsFor: 'itialization' stamp: 'P 5/10/2018 20:01:15'!
+withAmount: anAmount from: aSenderAccount to: aRecieverAccount
+	amount := anAmount.
+	from := aSenderAccount.
+	to := aRecieverAccount.
+	! !
+
+
+!Transfer methodsFor: 'as yet unclassified' stamp: 'P 5/10/2018 20:01:51'!
+balanceValue
+	self shouldBeImplemented.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Transfer class' category: #'PortfolioTreePrinter-Ejercicio'!
+Transfer class
+	instanceVariableNames: ''!
+
+!Transfer class methodsFor: 'performing' stamp: 'P 5/10/2018 20:04:10'!
+register: anAmount from: aSenderAccount to: aRecieverAccount
+	|recievingTransfer sendingTransfer|
+	recievingTransfer := RecievingTransfer new withAmount: anAmount from: aSenderAccount to:aRecieverAccount.
+	sendingTransfer := SendingTransfer new withAmount: anAmount from: aSenderAccount to:aRecieverAccount.
+	aSenderAccount register: sendingTransfer.
+	aRecieverAccount register: recievingTransfer.
+	
+"""
+	|sendingTransaction recievingTransaction|
+	sendingTransaction := OutgoingTransfer withAmount: anAmount from: aSenderAccount to: aRecieverAccount.
+	recievingTransaction := IngoingTransfer withAmount: anAmount from: aSenderAccount to: aRecieverAccount .
+"""! !
+
+
+!classDefinition: #IngoingTransfer category: #'PortfolioTreePrinter-Ejercicio'!
+Transfer subclass: #IngoingTransfer
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+
+!classDefinition: #OutgoingTransfer category: #'PortfolioTreePrinter-Ejercicio'!
+Transfer subclass: #OutgoingTransfer
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+
+!classDefinition: #RecievingTransfer category: #'PortfolioTreePrinter-Ejercicio'!
+Transfer subclass: #RecievingTransfer
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+
+!classDefinition: #SendingTransfer category: #'PortfolioTreePrinter-Ejercicio'!
+Transfer subclass: #SendingTransfer
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
