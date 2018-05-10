@@ -447,21 +447,12 @@ transactions
 			accumTransactions union: currManagee transactions.
 		]! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'P 5/7/2018 21:59:14'!
-transactionsOf: anAccount 
-	"Paulo -> leer esto: Esto esta hecho recontra cabeza, horibble, asco
-	Pero alta paja arregarlo ahora... to later"
-	^(managedPortfolios  detect: [ :managee |
-		(managee isKindOf: Portfolio) ifTrue: [
-				| found |
-				found := managee transactionsOf: anAccount .
-				found notNil
-			] ifFalse: [
-				managee  = anAccount 
-			].
-		] ifNone: [nil]) transactions
-	
-! !
+!Portfolio methodsFor: 'transactions' stamp: 'P 5/10/2018 00:45:59'!
+transactionsOf: anAccount
+	 (self manages: anAccount) ifFalse: [
+		Error signal: Portfolio accountNotManagedMessageDescription.
+		].
+	^anAccount transactions! !
 
 
 !Portfolio methodsFor: 'instance creation' stamp: 'P 5/7/2018 21:35:56'!
@@ -475,15 +466,31 @@ manageAccountsFrom: anAccountsCollections
 Portfolio class
 	instanceVariableNames: ''!
 
-!Portfolio class methodsFor: 'instance creation' stamp: 'P 5/7/2018 20:54:48'!
+!Portfolio class methodsFor: 'instance creation' stamp: 'P 5/10/2018 00:51:37'!
 with: anAccount1 with: anAccount2
-
+	(anAccount1 = anAccount2) ifTrue: [
+			Error signal: Portfolio accountAlreadyManagedErrorMessage.
+		].
+	((anAccount1 manages: anAccount2) or: [
+		anAccount2 manages: anAccount1
+		]) ifTrue: [
+			Error signal: Portfolio accountAlreadyManagedErrorMessage.
+		].
 	^self new manageAccountsFrom: (OrderedCollection with: anAccount1 with: anAccount2)! !
 
 !Portfolio class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 18:41'!
 withAll: aCollectionOfAccounts
 
 	self shouldBeImplemented ! !
+
+
+!Portfolio class methodsFor: 'errors' stamp: 'P 5/10/2018 00:49:26'!
+accountAlreadyManagedErrorMessage
+	^'Account being added already managed.'! !
+
+!Portfolio class methodsFor: 'errors' stamp: 'P 5/10/2018 00:46:45'!
+accountNotManagedMessageDescription
+	^'This account is not managed by the searched one'! !
 
 
 !classDefinition: #ReceptiveAccount category: #'Portfolio-Ejercicio'!
