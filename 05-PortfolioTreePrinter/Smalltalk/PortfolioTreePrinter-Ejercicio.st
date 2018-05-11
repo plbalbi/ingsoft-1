@@ -24,7 +24,7 @@ test02DepositIncreasesBalanceOnTransactionValue
 	self assert: 100 = account balance .
 ! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HernanWilkinson 7/14/2011 05:34'!
+!PortfolioTest methodsFor: 'tests' stamp: 'PB 5/10/2018 21:00:33'!
 test03WithdrawDecreasesBalanceOnTransactionValue 
 
 	| account |
@@ -33,7 +33,7 @@ test03WithdrawDecreasesBalanceOnTransactionValue
 	Deposit register: 100 on: account.
 	Withdraw register: 50 on: account.
 		
-	self assert: 50 = account balance .
+	self assert: 50 = account balance.
 ! !
 
 !PortfolioTest methodsFor: 'tests' stamp: 'HAW 9/28/2017 15:22:46'!
@@ -511,10 +511,9 @@ accountSummaryLinesOf: aReceptiveAccount
 	
 	^aReceptiveAccount accountSummary! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'HernanWilkinson 9/6/2016 19:43'!
+!PortfolioTest methodsFor: 'test support' stamp: 'PB 5/10/2018 21:35:31'!
 accountTransferNetOf: aReceptiveAccount 
-	
-	self shouldBeImplemented ! !
+	^aReceptiveAccount balance! !
 
 !PortfolioTest methodsFor: 'test support' stamp: 'HernanWilkinson 9/6/2016 19:43'!
 investmentEarningsOf: aReceptiveAccount 
@@ -544,11 +543,14 @@ Object subclass: #AccountTransaction
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-
 !AccountTransaction methodsFor: 'evaluating' stamp: 'P 5/10/2018 19:46:45'!
 value
 	self subclassResponsibility ! !
 
+
+!AccountTransaction methodsFor: 'as yet unclassified' stamp: 'PB 5/10/2018 21:01:02'!
+affectBalance: aBalance from: aTransactionOwner
+	^aBalance + self balanceValue ! !
 
 !AccountTransaction methodsFor: 'as yet unclassified' stamp: 'P 5/10/2018 19:46:56'!
 balanceValue
@@ -597,6 +599,11 @@ value
 
 	^ value! !
 
+
+!Deposit methodsFor: 'transaction information' stamp: 'PB 5/10/2018 21:16:22'!
+readableDescription
+	^'Deposito por ' , self value asString ! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Deposit class' category: #'PortfolioTreePrinter-Ejercicio'!
@@ -617,6 +624,82 @@ register: aValue on: account
 	account register: withdraw.
 		
 	^ withdraw! !
+
+
+!classDefinition: #IngoingTransfer category: #'PortfolioTreePrinter-Ejercicio'!
+AccountTransaction subclass: #IngoingTransfer
+	instanceVariableNames: 'transfer'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!IngoingTransfer methodsFor: 'initialization' stamp: 'PB 5/10/2018 21:06:56'!
+correspondingTo: aTransfer 
+	transfer := aTransfer ! !
+
+
+!IngoingTransfer methodsFor: 'as yet unclassified' stamp: 'PB 5/10/2018 21:20:19'!
+value
+	^transfer amount! !
+
+
+!IngoingTransfer methodsFor: 'comparing' stamp: 'PB 5/10/2018 21:19:34'!
+readableDescription
+	^'Transferencia por ' , self balanceValue asString ! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'IngoingTransfer class' category: #'PortfolioTreePrinter-Ejercicio'!
+IngoingTransfer class
+	instanceVariableNames: ''!
+
+!IngoingTransfer class methodsFor: 'class initialization' stamp: 'PB 5/10/2018 21:06:19'!
+registerOn: anAccount correspondingTo: aTransfer 
+	|ingoingTransfer|
+	ingoingTransfer := self new.
+	ingoingTransfer correspondingTo: aTransfer.
+	anAccount register: ingoingTransfer.
+	! !
+
+
+!classDefinition: #OutgoingTransfer category: #'PortfolioTreePrinter-Ejercicio'!
+AccountTransaction subclass: #OutgoingTransfer
+	instanceVariableNames: 'transfer'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!OutgoingTransfer methodsFor: 'initialization' stamp: 'PB 5/10/2018 21:05:27'!
+correspondingTo: aTransfer 
+	transfer := aTransfer ! !
+
+
+!OutgoingTransfer methodsFor: 'as yet unclassified' stamp: 'PB 5/10/2018 21:23:26'!
+balanceValue
+	^self value * -1! !
+
+!OutgoingTransfer methodsFor: 'as yet unclassified' stamp: 'PB 5/10/2018 21:08:40'!
+value
+	^transfer amount ! !
+
+
+!OutgoingTransfer methodsFor: 'information' stamp: 'PB 5/10/2018 21:19:02'!
+readableDescription
+	^'Transferencia por ' , self balanceValue asString! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'OutgoingTransfer class' category: #'PortfolioTreePrinter-Ejercicio'!
+OutgoingTransfer class
+	instanceVariableNames: ''!
+
+!OutgoingTransfer class methodsFor: 'class initialization' stamp: 'PB 5/10/2018 21:04:53'!
+registerOn: anAccount correspondingTo: aTransfer 
+	|outgoingTransfer|
+	outgoingTransfer := self new.
+	outgoingTransfer correspondingTo: aTransfer.
+	anAccount register: outgoingTransfer.
+	! !
 
 
 !classDefinition: #Withdraw category: #'PortfolioTreePrinter-Ejercicio'!
@@ -640,6 +723,11 @@ balanceValue
 value
 
 	^ value! !
+
+
+!Withdraw methodsFor: 'transaction information' stamp: 'PB 5/10/2018 21:17:39'!
+readableDescription
+	^'Extraccion por ' , self value asString ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -691,7 +779,6 @@ transactions
 
 	self subclassResponsibility ! !
 
-
 
 !classDefinition: #Portfolio category: #'PortfolioTreePrinter-Ejercicio'!
 SummarizingAccount subclass: #Portfolio
@@ -699,7 +786,6 @@ SummarizingAccount subclass: #Portfolio
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
-
 
 !Portfolio methodsFor: 'testing' stamp: 'HAW 5/8/2018 16:46:26'!
 anyManagedAccountManages: anAccount 
@@ -780,7 +866,6 @@ withAll: aCollectionOfAccounts
 	^self new initializeWithAll: aCollectionOfAccounts ! !
 
 
-
 !Portfolio class methodsFor: 'assertions' stamp: 'HernanWilkinson 9/18/2011 17:22'!
 check: sourceAccount doesNotManagaAnyOf: aCollectionOfAccounts
 
@@ -831,10 +916,13 @@ initialize
 	transactions := OrderedCollection new.! !
 
 
-!ReceptiveAccount methodsFor: 'transactions' stamp: 'P 5/10/2018 19:44:37'!
+!ReceptiveAccount methodsFor: 'transactions' stamp: 'PB 5/10/2018 20:58:09'!
 balance
-
-	^ transactions inject: 0 into: [ :balance :transaction | balance + transaction balanceValue]! !
+	^ transactions 
+		inject: 0 
+		into: [ :balance :transaction | 
+			transaction affectBalance: balance from: self.
+			]! !
 
 !ReceptiveAccount methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:37'!
 register: aTransaction
@@ -848,7 +936,6 @@ transactions
 	^ transactions copy! !
 
 
-
 !ReceptiveAccount methodsFor: 'testing' stamp: 'HernanWilkinson 7/13/2011 18:37'!
 manages: anAccount
 
@@ -860,6 +947,13 @@ registers: aTtransaction
 
 	^ transactions includes: aTtransaction 
 ! !
+
+
+!ReceptiveAccount methodsFor: 'account information' stamp: 'PB 5/10/2018 21:14:34'!
+accountSummary
+	^transactions collect: [ :transaction | 
+		transaction readableDescription.
+		]! !
 
 
 !classDefinition: #Transfer category: #'PortfolioTreePrinter-Ejercicio'!
@@ -877,9 +971,13 @@ withAmount: anAmount from: aSenderAccount to: aRecieverAccount
 	! !
 
 
-!Transfer methodsFor: 'as yet unclassified' stamp: 'P 5/10/2018 20:01:51'!
-balanceValue
-	self shouldBeImplemented.! !
+!Transfer methodsFor: 'accessing' stamp: 'PB 5/10/2018 21:09:10'!
+amount
+	^amount! !
+
+!Transfer methodsFor: 'accessing' stamp: 'PB 5/10/2018 21:40:01'!
+value
+	^amount! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -887,48 +985,11 @@ balanceValue
 Transfer class
 	instanceVariableNames: ''!
 
-!Transfer class methodsFor: 'performing' stamp: 'P 5/10/2018 20:04:10'!
+!Transfer class methodsFor: 'performing' stamp: 'PB 5/10/2018 20:56:08'!
 register: anAmount from: aSenderAccount to: aRecieverAccount
-	|recievingTransfer sendingTransfer|
-	recievingTransfer := RecievingTransfer new withAmount: anAmount from: aSenderAccount to:aRecieverAccount.
-	sendingTransfer := SendingTransfer new withAmount: anAmount from: aSenderAccount to:aRecieverAccount.
-	aSenderAccount register: sendingTransfer.
-	aRecieverAccount register: recievingTransfer.
+	|transfer|
+	transfer := Transfer new.
+	transfer withAmount: anAmount from: aSenderAccount  to: aRecieverAccount.
 	
-"""
-	|sendingTransaction recievingTransaction|
-	sendingTransaction := OutgoingTransfer withAmount: anAmount from: aSenderAccount to: aRecieverAccount.
-	recievingTransaction := IngoingTransfer withAmount: anAmount from: aSenderAccount to: aRecieverAccount .
-"""! !
-
-
-!classDefinition: #IngoingTransfer category: #'PortfolioTreePrinter-Ejercicio'!
-Transfer subclass: #IngoingTransfer
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
-
-
-!classDefinition: #OutgoingTransfer category: #'PortfolioTreePrinter-Ejercicio'!
-Transfer subclass: #OutgoingTransfer
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
-
-
-!classDefinition: #RecievingTransfer category: #'PortfolioTreePrinter-Ejercicio'!
-Transfer subclass: #RecievingTransfer
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
-
-
-!classDefinition: #SendingTransfer category: #'PortfolioTreePrinter-Ejercicio'!
-Transfer subclass: #SendingTransfer
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTreePrinter-Ejercicio'!
+	OutgoingTransfer registerOn: aSenderAccount correspondingTo: transfer.
+	IngoingTransfer registerOn: aRecieverAccount correspondingTo: transfer.! !
