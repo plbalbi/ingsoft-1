@@ -526,10 +526,13 @@ accountTransferNetOf: aReceptiveAccount
 			transferNet + currentTransactionValue.
 		]! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'HernanWilkinson 9/6/2016 19:43'!
+!PortfolioTest methodsFor: 'test support' stamp: 'PB 5/13/2018 18:43:22'!
 investmentEarningsOf: aReceptiveAccount 
-	
-	self shouldBeImplemented ! !
+	^aReceptiveAccount transactions inject: 0 into: [ :earnings :transaction |
+		(transaction isKindOf: CertificateOfDeposit) 
+			ifTrue: [ earnings + transaction earnings] 
+			ifFalse: [earnings]. 
+		]! !
 
 !PortfolioTest methodsFor: 'test support' stamp: 'PB 5/13/2018 18:32:02'!
 investmentNetOf: aReceptiveAccount 
@@ -600,9 +603,13 @@ AccountTransaction subclass: #CertificateOfDeposit
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!CertificateOfDeposit methodsFor: 'initialization' stamp: 'PB 5/13/2018 18:10:38'!
+!CertificateOfDeposit methodsFor: 'initialization' stamp: 'PB 5/13/2018 18:38:27'!
 intializeRegisteredWith: anAmount during: aTimePeriod at: aRate on: anAccount
-"aTimePeriod should be in days. Check if it should be added in message name"
+"
+Message arguments details:
+aTimePeriod should be in days. Check if it should be added in message name.
+aRate corresponds to the yearly interest.
+"
 	value := anAmount .
 	numberOfDays := aTimePeriod .
 	tna := aRate.
@@ -617,6 +624,19 @@ balanceValue
 !CertificateOfDeposit methodsFor: 'accessing' stamp: 'PB 5/13/2018 18:11:55'!
 value
 	^value! !
+
+
+!CertificateOfDeposit methodsFor: 'earnings' stamp: 'PB 5/13/2018 18:42:20'!
+earnings
+	^tna * (numberOfDays / 360) * value! !
+
+
+!CertificateOfDeposit methodsFor: 'transaction information' stamp: 'PB 5/13/2018 18:58:02'!
+readableDescription
+	^'Plazo fijo por ', (self value asString), 
+		' durante ', (numberOfDays asString),
+		' dias a una tna de ',
+		((tna*100) asString) ,'%'! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
