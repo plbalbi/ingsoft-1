@@ -511,9 +511,20 @@ accountSummaryLinesOf: aReceptiveAccount
 	
 	^aReceptiveAccount accountSummary! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'PB 5/10/2018 21:35:31'!
+!PortfolioTest methodsFor: 'test support' stamp: 'PB 5/13/2018 17:47:44'!
 accountTransferNetOf: aReceptiveAccount 
-	^aReceptiveAccount balance! !
+	^aReceptiveAccount transactions inject: 0 into: [ :transferNet :transaction |
+		|currentTransactionValue|
+		currentTransactionValue := 
+			((transaction isKindOf: IngoingTransfer) 
+			or: (transaction isKindOf: OutgoingTransfer)) 
+				ifTrue: [
+					transaction balanceValue.
+				] ifFalse: [
+					0
+				].
+			transferNet + currentTransactionValue.
+		]! !
 
 !PortfolioTest methodsFor: 'test support' stamp: 'HernanWilkinson 9/6/2016 19:43'!
 investmentEarningsOf: aReceptiveAccount 
@@ -647,6 +658,11 @@ value
 readableDescription
 	^'Transferencia por ' , self balanceValue asString ! !
 
+
+!IngoingTransfer methodsFor: 'accessing' stamp: 'PB 5/13/2018 17:23:09'!
+transfer
+	^transfer! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'IngoingTransfer class' category: #'PortfolioTreePrinter-Ejercicio'!
@@ -686,6 +702,11 @@ value
 !OutgoingTransfer methodsFor: 'information' stamp: 'PB 5/10/2018 21:19:02'!
 readableDescription
 	^'Transferencia por ' , self balanceValue asString! !
+
+
+!OutgoingTransfer methodsFor: 'accessing' stamp: 'PB 5/13/2018 17:22:52'!
+transfer
+	^transfer! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -975,9 +996,9 @@ withAmount: anAmount from: aSenderAccount to: aRecieverAccount
 amount
 	^amount! !
 
-!Transfer methodsFor: 'accessing' stamp: 'PB 5/10/2018 21:40:01'!
+!Transfer methodsFor: 'accessing' stamp: 'PB 5/13/2018 17:21:56'!
 value
-	^amount! !
+	^self amount! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -985,11 +1006,13 @@ value
 Transfer class
 	instanceVariableNames: ''!
 
-!Transfer class methodsFor: 'performing' stamp: 'PB 5/10/2018 20:56:08'!
+!Transfer class methodsFor: 'performing' stamp: 'PB 5/13/2018 17:22:25'!
 register: anAmount from: aSenderAccount to: aRecieverAccount
 	|transfer|
 	transfer := Transfer new.
 	transfer withAmount: anAmount from: aSenderAccount  to: aRecieverAccount.
 	
 	OutgoingTransfer registerOn: aSenderAccount correspondingTo: transfer.
-	IngoingTransfer registerOn: aRecieverAccount correspondingTo: transfer.! !
+	IngoingTransfer registerOn: aRecieverAccount correspondingTo: transfer.
+	
+	^transfer ! !
