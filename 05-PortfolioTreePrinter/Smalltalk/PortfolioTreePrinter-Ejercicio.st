@@ -548,15 +548,34 @@ investmentNetOf: aReceptiveAccount
 			transferNet + currentTransactionValue.
 		]! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'HernanWilkinson 9/6/2016 19:43'!
+!PortfolioTest methodsFor: 'test support' stamp: 'PB 5/13/2018 19:37:45'!
 portofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
-	
-	self shouldBeImplemented ! !
+	|portfolioTree|
+	portfolioTree := aPortfolio managedAccounts 
+		inject: (OrderedCollection new)
+		into: [ :tree :account |
+			(account isKindOf: Portfolio) 
+				ifTrue: [
+					| childPortfolioTree |
+					childPortfolioTree := self portofolioTreeOf: account namingAccountWith: aDictionary.
+					childPortfolioTree := childPortfolioTree collect: 
+						[ :portfolioMember | 
+							' ',portfolioMember.
+							].
+					tree addAllLast: childPortfolioTree.
+					]
+				ifFalse: [
+					tree add: ' ',(aDictionary at: account ).
+					].
+			tree.
+		].
+	portfolioTree addFirst: (aDictionary at: aPortfolio).
+	^portfolioTree
+	! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'HernanWilkinson 9/6/2016 19:43'!
+!PortfolioTest methodsFor: 'test support' stamp: 'PB 5/13/2018 19:40:40'!
 reversePortofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
-	
-	self shouldBeImplemented ! !
+	^(self portofolioTreeOf: aPortfolio namingAccountWith: aDictionary) reversed ! !
 
 
 !classDefinition: #AccountTransaction category: #'PortfolioTreePrinter-Ejercicio'!
@@ -927,6 +946,10 @@ manage: anAccount
 	managedPortfolios add: anAccount 
 	
 ! !
+
+!Portfolio methodsFor: 'accounting' stamp: 'PB 5/13/2018 19:11:46'!
+managedAccounts
+	^accounts ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
