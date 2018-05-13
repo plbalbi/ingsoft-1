@@ -531,10 +531,19 @@ investmentEarningsOf: aReceptiveAccount
 	
 	self shouldBeImplemented ! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'HernanWilkinson 9/6/2016 19:43'!
+!PortfolioTest methodsFor: 'test support' stamp: 'PB 5/13/2018 18:32:02'!
 investmentNetOf: aReceptiveAccount 
-	
-	self shouldBeImplemented ! !
+	^aReceptiveAccount transactions inject: 0 into: [ :transferNet :transaction |
+		|currentTransactionValue|
+		currentTransactionValue := 
+			(transaction isKindOf: CertificateOfDeposit) 
+				ifTrue: [
+					transaction value.
+				] ifFalse: [
+					0
+				].
+			transferNet + currentTransactionValue.
+		]! !
 
 !PortfolioTest methodsFor: 'test support' stamp: 'HernanWilkinson 9/6/2016 19:43'!
 portofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
@@ -590,6 +599,37 @@ AccountTransaction subclass: #CertificateOfDeposit
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!CertificateOfDeposit methodsFor: 'initialization' stamp: 'PB 5/13/2018 18:10:38'!
+intializeRegisteredWith: anAmount during: aTimePeriod at: aRate on: anAccount
+"aTimePeriod should be in days. Check if it should be added in message name"
+	value := anAmount .
+	numberOfDays := aTimePeriod .
+	tna := aRate.
+	account := anAccount.
+! !
+
+
+!CertificateOfDeposit methodsFor: 'accessing' stamp: 'PB 5/13/2018 18:31:20'!
+balanceValue
+	^self value * -1! !
+
+!CertificateOfDeposit methodsFor: 'accessing' stamp: 'PB 5/13/2018 18:11:55'!
+value
+	^value! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'CertificateOfDeposit class' category: #'PortfolioTreePrinter-Ejercicio'!
+CertificateOfDeposit class
+	instanceVariableNames: ''!
+
+!CertificateOfDeposit class methodsFor: 'instance creation' stamp: 'PB 5/13/2018 18:11:27'!
+register: anAmount during: aDuration at: aRate on: anAccount
+	|certificateOfDeposit|
+	certificateOfDeposit := self new intializeRegisteredWith: anAmount during: aDuration at: aRate on:anAccount.
+	anAccount register: certificateOfDeposit.
+	^certificateOfDeposit ! !
 
 
 !classDefinition: #Deposit category: #'PortfolioTreePrinter-Ejercicio'!
