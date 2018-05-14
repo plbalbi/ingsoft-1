@@ -506,10 +506,10 @@ test29ReversePortfolioTreePrinterPrintsTheCompositeStartingFromTheLeaves
 	! !
 
 
-!PortfolioTest methodsFor: 'test support' stamp: 'HAW 9/25/2017 21:44:47'!
-accountSummaryLinesOf: aReceptiveAccount 
+!PortfolioTest methodsFor: 'test support' stamp: 'PB 5/14/2018 18:03:04'!
+accountSummaryLinesOf: anAccount 
 	
-	^aReceptiveAccount accountSummary! !
+	^(AccountSummary from: anAccount) value! !
 
 !PortfolioTest methodsFor: 'test support' stamp: 'PB 5/13/2018 17:47:44'!
 accountTransferNetOf: aReceptiveAccount 
@@ -578,6 +578,98 @@ reversePortofolioTreeOf: aPortfolio namingAccountWith: aDictionary
 	^(self portofolioTreeOf: aPortfolio namingAccountWith: aDictionary) reversed ! !
 
 
+!classDefinition: #AccountIterator category: #'PortfolioTreePrinter-Ejercicio'!
+Object subclass: #AccountIterator
+	instanceVariableNames: 'account accumulator'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!AccountIterator methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:24:25'!
+initialize
+	self subclassResponsibility ! !
+
+!AccountIterator methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:16:45'!
+initializeWith: anAccount
+	account := anAccount .! !
+
+!AccountIterator methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:15:48'!
+iteratedFromADeposit: aDeposit 
+	self subclassResponsibility ! !
+
+!AccountIterator methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:15:53'!
+iteratedFromAWithdraw: aWithdraw 
+	self subclassResponsibility ! !
+
+!AccountIterator methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:16:12'!
+iteratedFromCertificateOfDeposit: aCertificateOfDeposit 
+	self subclassResponsibility ! !
+
+!AccountIterator methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:16:18'!
+iteratedFromIngoingTransfer: anIngoingTransfer
+	self subclassResponsibility ! !
+
+!AccountIterator methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:16:24'!
+iteratedFromOutgoingTransfer: anOutgoingTransfer 
+	self subclassResponsibility ! !
+
+!AccountIterator methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:16:29'!
+iteratedFromReceptiveAccount: aReceptiveAccount 
+	self subclassResponsibility ! !
+
+!AccountIterator methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:28:49'!
+value
+	account iterate: self.
+	^accumulator
+	! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'AccountIterator class' category: #'PortfolioTreePrinter-Ejercicio'!
+AccountIterator class
+	instanceVariableNames: ''!
+
+!AccountIterator class methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:27:42'!
+from: anAccount
+	^self new initializeWith: anAccount.! !
+
+
+!classDefinition: #AccountSummary category: #'PortfolioTreePrinter-Ejercicio'!
+AccountIterator subclass: #AccountSummary
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:29:07'!
+initialize
+	accumulator := OrderedCollection new.
+	^self! !
+
+!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:29:16'!
+iteratedFromADeposit: aDeposit 
+	accumulator addLast: 'Deposito por ' , (aDeposit value asString) ! !
+
+!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:29:22'!
+iteratedFromAWithdraw: aWithdraw 
+	accumulator addLast: 'Extraccion por ' , (aWithdraw value asString)! !
+
+!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:29:27'!
+iteratedFromCertificateOfDeposit: aCertificateOfDeposit 
+	accumulator addLast: 'Plazo fijo por ', (aCertificateOfDeposit value asString), ' durante ', (aCertificateOfDeposit numberOfDays asString), ' dias a una tna de ', ((aCertificateOfDeposit tna * 100) asString), '%'! !
+
+!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:14:31'!
+iteratedFromIngoingTransfer: anIngoingTransfer
+	self iteratedFromOutgoingTransfer: anIngoingTransfer ! !
+
+!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:29:35'!
+iteratedFromOutgoingTransfer: anOutgoingTransfer 
+	accumulator addLast: 'Transferencia por ', (anOutgoingTransfer balanceValue asString)! !
+
+!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 18:48:07'!
+iteratedFromReceptiveAccount: aReceptiveAccount ! !
+
+
 !classDefinition: #AccountTransaction category: #'PortfolioTreePrinter-Ejercicio'!
 Object subclass: #AccountTransaction
 	instanceVariableNames: ''
@@ -640,6 +732,14 @@ aRate corresponds to the yearly interest.
 balanceValue
 	^self value * -1! !
 
+!CertificateOfDeposit methodsFor: 'accessing' stamp: 'PB 5/14/2018 19:04:39'!
+numberOfDays
+	^numberOfDays! !
+
+!CertificateOfDeposit methodsFor: 'accessing' stamp: 'PB 5/14/2018 19:04:16'!
+tna
+	^tna! !
+
 !CertificateOfDeposit methodsFor: 'accessing' stamp: 'PB 5/13/2018 18:11:55'!
 value
 	^value! !
@@ -656,6 +756,11 @@ readableDescription
 		' durante ', (numberOfDays asString),
 		' dias a una tna de ',
 		((tna*100) asString) ,'%'! !
+
+
+!CertificateOfDeposit methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:01:15'!
+iterate: anAccountSummary 
+	anAccountSummary iteratedFromCertificateOfDeposit: self! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -694,6 +799,11 @@ value
 readableDescription
 	^'Deposito por ' , self value asString ! !
 
+
+!Deposit methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 18:48:37'!
+iterate: aSender 
+	aSender iteratedFromADeposit: self! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Deposit class' category: #'PortfolioTreePrinter-Ejercicio'!
@@ -727,6 +837,10 @@ AccountTransaction subclass: #IngoingTransfer
 correspondingTo: aTransfer 
 	transfer := aTransfer ! !
 
+
+!IngoingTransfer methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:14:08'!
+iterate: anAccountSummary 
+	anAccountSummary iteratedFromIngoingTransfer: self! !
 
 !IngoingTransfer methodsFor: 'as yet unclassified' stamp: 'PB 5/10/2018 21:20:19'!
 value
@@ -772,6 +886,10 @@ correspondingTo: aTransfer
 !OutgoingTransfer methodsFor: 'as yet unclassified' stamp: 'PB 5/10/2018 21:23:26'!
 balanceValue
 	^self value * -1! !
+
+!OutgoingTransfer methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 18:54:00'!
+iterate: anAccountSummary 
+	anAccountSummary iteratedFromOutgoingTransfer: self! !
 
 !OutgoingTransfer methodsFor: 'as yet unclassified' stamp: 'PB 5/10/2018 21:08:40'!
 value
@@ -829,6 +947,11 @@ value
 readableDescription
 	^'Extraccion por ' , self value asString ! !
 
+
+!Withdraw methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 18:52:03'!
+iterate: aSender 
+	aSender iteratedFromAWithdraw: self! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Withdraw class' category: #'PortfolioTreePrinter-Ejercicio'!
@@ -857,6 +980,11 @@ Object subclass: #SummarizingAccount
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!SummarizingAccount methodsFor: 'testing' stamp: 'PB 5/14/2018 18:44:20'!
+iterate: aSender
+	self subclassResponsibility 
+	! !
 
 !SummarizingAccount methodsFor: 'testing' stamp: 'HernanWilkinson 7/13/2011 18:34'!
 manages: anAccount
@@ -940,6 +1068,10 @@ initializeWithAll: aCollectionOfAccounts
 manageAccountsFrom: anAccountsCollections
 	managedPortfolios addAll: anAccountsCollections! !
 
+
+!Portfolio methodsFor: 'accounting' stamp: 'PB 5/14/2018 18:29:14'!
+iterateAndDo: aDoClosure
+	accounts do: aDoClosure ! !
 
 !Portfolio methodsFor: 'accounting' stamp: 'P 5/7/2018 21:37:57'!
 manage: anAccount
@@ -1040,6 +1172,10 @@ transactions
 	^ transactions copy! !
 
 
+!ReceptiveAccount methodsFor: 'testing' stamp: 'PB 5/14/2018 18:28:48'!
+iterateAndDo: aDoClosure
+	transactions do: aDoClosure! !
+
 !ReceptiveAccount methodsFor: 'testing' stamp: 'HernanWilkinson 7/13/2011 18:37'!
 manages: anAccount
 
@@ -1058,6 +1194,13 @@ accountSummary
 	^transactions collect: [ :transaction | 
 		transaction readableDescription.
 		]! !
+
+
+!ReceptiveAccount methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 18:47:14'!
+iterate: anAccountSummary 
+	anAccountSummary iteratedFromReceptiveAccount: self.
+	transactions do: [ :transaction | transaction iterate: anAccountSummary ].
+	! !
 
 
 !classDefinition: #Transfer category: #'PortfolioTreePrinter-Ejercicio'!
