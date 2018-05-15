@@ -548,8 +548,11 @@ investmentNetOf: aReceptiveAccount
 			transferNet + currentTransactionValue.
 		]! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'PB 5/13/2018 19:37:45'!
+!PortfolioTest methodsFor: 'test support' stamp: 'PB 5/15/2018 19:36:17'!
 portofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
+
+	^(PortofolioTree of: aPortfolio withNamesFrom: aDictionary) value
+"""
 	|portfolioTree|
 	portfolioTree := aPortfolio managedAccounts 
 		inject: (OrderedCollection new)
@@ -571,7 +574,8 @@ portofolioTreeOf: aPortfolio namingAccountWith: aDictionary
 		].
 	portfolioTree addFirst: (aDictionary at: aPortfolio).
 	^portfolioTree
-	! !
+	
+"""! !
 
 !PortfolioTest methodsFor: 'test support' stamp: 'PB 5/13/2018 19:40:40'!
 reversePortofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
@@ -613,8 +617,8 @@ iteratedFromIngoingTransfer: anIngoingTransfer
 iteratedFromOutgoingTransfer: anOutgoingTransfer 
 	self subclassResponsibility ! !
 
-!AccountIterator methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:16:29'!
-iteratedFromReceptiveAccount: aReceptiveAccount 
+!AccountIterator methodsFor: 'as yet unclassified' stamp: 'PB 5/15/2018 19:51:36'!
+iteratedFromReceptiveAccount: anAccount 
 	self subclassResponsibility ! !
 
 !AccountIterator methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:28:49'!
@@ -668,6 +672,60 @@ iteratedFromOutgoingTransfer: anOutgoingTransfer
 
 !AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 18:48:07'!
 iteratedFromReceptiveAccount: aReceptiveAccount ! !
+
+
+!classDefinition: #PortofolioTree category: #'PortfolioTreePrinter-Ejercicio'!
+AccountIterator subclass: #PortofolioTree
+	instanceVariableNames: 'names prefix'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!PortofolioTree methodsFor: 'initialization' stamp: 'PB 5/15/2018 19:54:54'!
+initialize
+	accumulator := OrderedCollection new.
+	prefix := ''.! !
+
+!PortofolioTree methodsFor: 'initialization' stamp: 'PB 5/15/2018 19:35:58'!
+initializeOf: aPortfolio withNamesFrom: aDictionary 
+	account  := aPortfolio.
+	names := aDictionary.
+	^self! !
+
+!PortofolioTree methodsFor: 'initialization' stamp: 'PB 5/15/2018 19:56:48'!
+iteratedFromReceptiveAccount: aReceptiveAccount
+	accumulator addLast: (self nameWithPrefixOf: aReceptiveAccount).! !
+
+
+!PortofolioTree methodsFor: 'iteration' stamp: 'PB 5/15/2018 19:56:48'!
+iteratedFromAPortfolio: aPortfolio
+	accumulator addLast: (self nameWithPrefixOf: aPortfolio).
+	self setPrefix: self prefix , ' '.! !
+
+
+!PortofolioTree methodsFor: 'accessing' stamp: 'PB 5/15/2018 19:57:58'!
+nameWithPrefixOf: aPortfolio
+	^self prefix , (names at: aPortfolio)
+! !
+
+!PortofolioTree methodsFor: 'accessing' stamp: 'PB 5/15/2018 19:54:29'!
+prefix
+	^prefix! !
+
+!PortofolioTree methodsFor: 'accessing' stamp: 'PB 5/15/2018 19:55:18'!
+setPrefix: aPrefix 
+	prefix := aPrefix ! !
+
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'PortofolioTree class' category: #'PortfolioTreePrinter-Ejercicio'!
+PortofolioTree class
+	instanceVariableNames: ''!
+
+!PortofolioTree class methodsFor: 'instance creation' stamp: 'PB 5/15/2018 19:34:26'!
+of: aPortfolio withNamesFrom: aDictionary 
+	^self new initializeOf: aPortfolio withNamesFrom: aDictionary ! !
 
 
 !classDefinition: #AccountTransaction category: #'PortfolioTreePrinter-Ejercicio'!
@@ -981,11 +1039,6 @@ Object subclass: #SummarizingAccount
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!SummarizingAccount methodsFor: 'testing' stamp: 'PB 5/14/2018 18:44:20'!
-iterate: aSender
-	self subclassResponsibility 
-	! !
-
 !SummarizingAccount methodsFor: 'testing' stamp: 'HernanWilkinson 7/13/2011 18:34'!
 manages: anAccount
 
@@ -1064,14 +1117,16 @@ initializeWithAll: aCollectionOfAccounts
 
 	accounts := aCollectionOfAccounts   ! !
 
+!Portfolio methodsFor: 'initialization' stamp: 'PB 5/15/2018 19:48:35'!
+iterate: aSender
+	aSender iteratedFromAPortfolio: self.
+	accounts do: [ :account | account iterate: aSender ].
+	! !
+
 !Portfolio methodsFor: 'initialization' stamp: 'P 5/10/2018 01:05:48'!
 manageAccountsFrom: anAccountsCollections
 	managedPortfolios addAll: anAccountsCollections! !
 
-
-!Portfolio methodsFor: 'accounting' stamp: 'PB 5/14/2018 18:29:14'!
-iterateAndDo: aDoClosure
-	accounts do: aDoClosure ! !
 
 !Portfolio methodsFor: 'accounting' stamp: 'P 5/7/2018 21:37:57'!
 manage: anAccount
