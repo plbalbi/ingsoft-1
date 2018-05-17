@@ -451,7 +451,7 @@ test27ShouldBeAbleToBeQueryTransferNetWithCertificateOfDeposit
 	self assert: 150 = (self accountTransferNetOf: fromAccount).
 	self assert: -150 = (self accountTransferNetOf: toAccount).! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HernanWilkinson 9/26/2011 16:29'!
+!PortfolioTest methodsFor: 'tests' stamp: 'PO 5/16/2018 21:33:32'!
 test28PortfolioTreePrinterPrintsTheCompositeInDepthFirstOrder
 
 	| account1 account2 account3 complexPortfolio composedPortfolio accountNames lines |
@@ -469,8 +469,8 @@ test28PortfolioTreePrinterPrintsTheCompositeInDepthFirstOrder
 	accountNames at: account2 put: 'account2'.
 	accountNames at: account3 put: 'account3'.
 		
-	lines := self portofolioTreeOf: composedPortfolio namingAccountWith: accountNames.
-		
+	lines := self portfolioTreeOf: composedPortfolio namingAccountWith: accountNames.
+
 	self assert: 5 = lines size.
 	self assert: 'composedPortfolio' = (lines at: 1).
 	self assert: ' complexPortfolio' = (lines at: 2).
@@ -478,32 +478,43 @@ test28PortfolioTreePrinterPrintsTheCompositeInDepthFirstOrder
 	self assert: '  account2' = (lines at: 4).
 	self assert: ' account3' = (lines at: 5).! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HernanWilkinson 9/26/2011 16:30'!
+!PortfolioTest methodsFor: 'tests' stamp: 'PO 5/16/2018 21:54:50'!
 test29ReversePortfolioTreePrinterPrintsTheCompositeStartingFromTheLeaves
-
 	| account1 account2 account3 complexPortfolio composedPortfolio accountNames lines |
-	account1 := ReceptiveAccount new. 
-	account2 := ReceptiveAccount new. 
-	account3 := ReceptiveAccount new. 
-	complexPortfolio := Portfolio with: account1 with: account2.
-	composedPortfolio := Portfolio with: complexPortfolio with: account3.
-
-	accountNames := Dictionary new.
-	accountNames at: composedPortfolio put: 'composedPortfolio'.
-	accountNames at: complexPortfolio put: 'complexPortfolio'.
-	accountNames at: account1 put: 'account1'.
-	accountNames at: account2 put: 'account2'.
-	accountNames at: account3 put: 'account3'.
-		
-	lines := self reversePortofolioTreeOf: composedPortfolio namingAccountWith: accountNames.
-		
+	account1 _ ReceptiveAccount new.
+	account2 _ ReceptiveAccount new.
+	account3 _ ReceptiveAccount new.
+	complexPortfolio _ Portfolio
+		with: account1
+		with: account2.
+	composedPortfolio _ Portfolio
+		with: complexPortfolio
+		with: account3.
+	accountNames _ Dictionary new.
+	accountNames
+		at: composedPortfolio
+		put: 'composedPortfolio'.
+	accountNames
+		at: complexPortfolio
+		put: 'complexPortfolio'.
+	accountNames
+		at: account1
+		put: 'account1'.
+	accountNames
+		at: account2
+		put: 'account2'.
+	accountNames
+		at: account3
+		put: 'account3'.
+	lines _ self
+		reversePortfolioTreeOf: composedPortfolio
+		namingAccountWith: accountNames.
 	self assert: 5 = lines size.
 	self assert: ' account3' = (lines at: 1).
 	self assert: '  account2' = (lines at: 2).
 	self assert: '  account1' = (lines at: 3).
 	self assert: ' complexPortfolio' = (lines at: 4).
-	self assert: 'composedPortfolio' = (lines at: 5).
-	! !
+	self assert: 'composedPortfolio' = (lines at: 5).! !
 
 
 !PortfolioTest methodsFor: 'test support' stamp: 'PB 5/14/2018 18:03:04'!
@@ -548,11 +559,12 @@ investmentNetOf: aReceptiveAccount
 			transferNet + currentTransactionValue.
 		]! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'PB 5/15/2018 19:36:17'!
-portofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
-
-	^(PortofolioTree of: aPortfolio withNamesFrom: aDictionary) value
-"""
+!PortfolioTest methodsFor: 'test support' stamp: 'PO 5/16/2018 21:32:19'!
+portfolioTreeOf: aPortfolio namingAccountWith: aDictionary
+	^ (PortfolioTree
+		of: aPortfolio
+		withNamesFrom: aDictionary) value""
+	"
 	|portfolioTree|
 	portfolioTree := aPortfolio managedAccounts 
 		inject: (OrderedCollection new)
@@ -575,11 +587,14 @@ portofolioTreeOf: aPortfolio namingAccountWith: aDictionary
 	portfolioTree addFirst: (aDictionary at: aPortfolio).
 	^portfolioTree
 	
-"""! !
+"
+	"".! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'PB 5/13/2018 19:40:40'!
-reversePortofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
-	^(self portofolioTreeOf: aPortfolio namingAccountWith: aDictionary) reversed ! !
+!PortfolioTest methodsFor: 'test support' stamp: 'PO 5/16/2018 21:54:50'!
+reversePortfolioTreeOf: aPortfolio namingAccountWith: aDictionary
+	^ (self
+		portfolioTreeOf: aPortfolio
+		namingAccountWith: aDictionary) reversed.! !
 
 
 !classDefinition: #AccountQuery category: #'PortfolioTreePrinter-Ejercicio'!
@@ -589,43 +604,45 @@ Object subclass: #AccountQuery
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!AccountQuery methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:24:25'!
-initialize
-	self subclassResponsibility ! !
-
-!AccountQuery methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:16:45'!
-initializeWith: anAccount
-	account := anAccount .! !
-
-!AccountQuery methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:19:14'!
-queriedFromADeposit: aDeposit
-	self subclassResponsibility.! !
-
-!AccountQuery methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:22:09'!
-queriedFromAWithdraw: aWithdraw
-	self subclassResponsibility.! !
-
-!AccountQuery methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:20:50'!
-queriedFromCertificateOfDeposit: aCertificateOfDeposit
-	self subclassResponsibility.! !
-
-!AccountQuery methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:20:36'!
-queriedFromIngoingTransfer: anIngoingTransfer
-	self subclassResponsibility.! !
-
-!AccountQuery methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:20:18'!
-queriedFromOutgoingTransfer: anOutgoingTransfer
-	self subclassResponsibility.! !
-
-!AccountQuery methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:20:00'!
-queriedFromReceptiveAccount: anAccount
-	self subclassResponsibility.! !
-
 !AccountQuery methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:28:49'!
 value
 	account iterate: self.
 	^accumulator
 	! !
+
+
+!AccountQuery methodsFor: 'initialization' stamp: 'PB 5/14/2018 19:24:25'!
+initialize
+	self subclassResponsibility ! !
+
+!AccountQuery methodsFor: 'initialization' stamp: 'PB 5/14/2018 19:16:45'!
+initializeWith: anAccount
+	account := anAccount .! !
+
+
+!AccountQuery methodsFor: 'response' stamp: 'PB 5/16/2018 18:19:14'!
+queriedFromADeposit: aDeposit
+	self subclassResponsibility.! !
+
+!AccountQuery methodsFor: 'response' stamp: 'PB 5/16/2018 18:22:09'!
+queriedFromAWithdraw: aWithdraw
+	self subclassResponsibility.! !
+
+!AccountQuery methodsFor: 'response' stamp: 'PB 5/16/2018 18:20:50'!
+queriedFromCertificateOfDeposit: aCertificateOfDeposit
+	self subclassResponsibility.! !
+
+!AccountQuery methodsFor: 'response' stamp: 'PB 5/16/2018 18:20:36'!
+queriedFromIngoingTransfer: anIngoingTransfer
+	self subclassResponsibility.! !
+
+!AccountQuery methodsFor: 'response' stamp: 'PB 5/16/2018 18:20:18'!
+queriedFromOutgoingTransfer: anOutgoingTransfer
+	self subclassResponsibility.! !
+
+!AccountQuery methodsFor: 'response' stamp: 'PB 5/16/2018 18:20:00'!
+queriedFromReceptiveAccount: anAccount
+	self subclassResponsibility.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -645,86 +662,88 @@ AccountQuery subclass: #AccountSummary
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/14/2018 19:29:07'!
+!AccountSummary methodsFor: 'initialization' stamp: 'PB 5/14/2018 19:29:07'!
 initialize
 	accumulator := OrderedCollection new.
 	^self! !
 
-!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:19:14'!
+
+!AccountSummary methodsFor: 'response' stamp: 'PB 5/16/2018 18:19:14'!
 queriedFromADeposit: aDeposit
 	accumulator addLast: 'Deposito por ' , aDeposit value asString.! !
 
-!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:22:09'!
+!AccountSummary methodsFor: 'response' stamp: 'PB 5/16/2018 18:22:09'!
 queriedFromAWithdraw: aWithdraw
 	accumulator addLast: 'Extraccion por ' , aWithdraw value asString.! !
 
-!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:20:50'!
+!AccountSummary methodsFor: 'response' stamp: 'PB 5/16/2018 18:20:50'!
 queriedFromCertificateOfDeposit: aCertificateOfDeposit
 	accumulator addLast: 'Plazo fijo por ' , aCertificateOfDeposit value asString , ' durante ' , aCertificateOfDeposit numberOfDays asString , ' dias a una tna de ' , (aCertificateOfDeposit tna * 100) asString , '%'.! !
 
-!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:20:36'!
+!AccountSummary methodsFor: 'response' stamp: 'PB 5/16/2018 18:20:36'!
 queriedFromIngoingTransfer: anIngoingTransfer
 	self queriedFromOutgoingTransfer: anIngoingTransfer.! !
 
-!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:20:18'!
+!AccountSummary methodsFor: 'response' stamp: 'PB 5/16/2018 18:20:18'!
 queriedFromOutgoingTransfer: anOutgoingTransfer
 	accumulator addLast: 'Transferencia por ' , anOutgoingTransfer balanceValue asString.! !
 
-!AccountSummary methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:20:00'!
+!AccountSummary methodsFor: 'response' stamp: 'PB 5/16/2018 18:20:00'!
 queriedFromReceptiveAccount: aReceptiveAccount
 	^ self.! !
 
 
-!classDefinition: #PortofolioTree category: #'PortfolioTreePrinter-Ejercicio'!
-AccountQuery subclass: #PortofolioTree
+!classDefinition: #PortfolioTree category: #'PortfolioTreePrinter-Ejercicio'!
+AccountQuery subclass: #PortfolioTree
 	instanceVariableNames: 'names prefix'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!PortofolioTree methodsFor: 'initialization' stamp: 'PB 5/15/2018 19:54:54'!
+!PortfolioTree methodsFor: 'initialization' stamp: 'PB 5/15/2018 19:54:54'!
 initialize
 	accumulator := OrderedCollection new.
 	prefix := ''.! !
 
-!PortofolioTree methodsFor: 'initialization' stamp: 'PB 5/15/2018 19:35:58'!
+!PortfolioTree methodsFor: 'initialization' stamp: 'PB 5/15/2018 19:35:58'!
 initializeOf: aPortfolio withNamesFrom: aDictionary 
 	account  := aPortfolio.
 	names := aDictionary.
 	^self! !
 
-!PortofolioTree methodsFor: 'initialization' stamp: 'PB 5/16/2018 18:20:00'!
+!PortfolioTree methodsFor: 'initialization' stamp: 'PB 5/16/2018 18:20:00'!
 queriedFromReceptiveAccount: aReceptiveAccount
 	accumulator addLast: (self nameWithPrefixOf: aReceptiveAccount).! !
 
 
-!PortofolioTree methodsFor: 'iteration' stamp: 'PB 5/16/2018 18:29:56'!
+!PortfolioTree methodsFor: 'iteration' stamp: 'PO 5/16/2018 19:49:23'!
 iteratedFromAPortfolio: aPortfolio
 	accumulator addLast: (self nameWithPrefixOf: aPortfolio).
-	self setPrefix: self prefix , ' '.
-	aPortfolio doWithAccounts: [:account | account iterate: self]! !
+	self addPrefix.
+	aPortfolio doWithAccounts: [ :account |
+		account iterate: self ].! !
 
 
-!PortofolioTree methodsFor: 'accessing' stamp: 'PB 5/15/2018 19:57:58'!
+!PortfolioTree methodsFor: 'accessing' stamp: 'PO 5/16/2018 20:48:08'!
+addPrefix
+	prefix := prefix,' '.! !
+
+!PortfolioTree methodsFor: 'accessing' stamp: 'PB 5/15/2018 19:57:58'!
 nameWithPrefixOf: aPortfolio
 	^self prefix , (names at: aPortfolio)
 ! !
 
-!PortofolioTree methodsFor: 'accessing' stamp: 'PB 5/15/2018 19:54:29'!
+!PortfolioTree methodsFor: 'accessing' stamp: 'PB 5/15/2018 19:54:29'!
 prefix
 	^prefix! !
 
-!PortofolioTree methodsFor: 'accessing' stamp: 'PB 5/15/2018 19:55:18'!
-setPrefix: aPrefix 
-	prefix := aPrefix ! !
-
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'PortofolioTree class' category: #'PortfolioTreePrinter-Ejercicio'!
-PortofolioTree class
+!classDefinition: 'PortfolioTree class' category: #'PortfolioTreePrinter-Ejercicio'!
+PortfolioTree class
 	instanceVariableNames: ''!
 
-!PortofolioTree class methodsFor: 'instance creation' stamp: 'PB 5/15/2018 19:34:26'!
+!PortfolioTree class methodsFor: 'instance creation' stamp: 'PB 5/15/2018 19:34:26'!
 of: aPortfolio withNamesFrom: aDictionary 
 	^self new initializeOf: aPortfolio withNamesFrom: aDictionary ! !
 
@@ -859,7 +878,7 @@ readableDescription
 	^'Deposito por ' , self value asString ! !
 
 
-!Deposit methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:23:57'!
+!Deposit methodsFor: 'iteration' stamp: 'PB 5/16/2018 18:23:57'!
 iterate: aSender 
 	aSender queriedFromADeposit: self! !
 
@@ -1256,7 +1275,7 @@ accountSummary
 		]! !
 
 
-!ReceptiveAccount methodsFor: 'as yet unclassified' stamp: 'PB 5/16/2018 18:23:47'!
+!ReceptiveAccount methodsFor: 'iteration' stamp: 'PB 5/16/2018 18:23:47'!
 iterate: anAccountSummary 
 	anAccountSummary queriedFromReceptiveAccount: self.
 	transactions do: [ :transaction | transaction iterate: anAccountSummary ].
