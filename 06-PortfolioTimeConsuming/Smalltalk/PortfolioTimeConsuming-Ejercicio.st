@@ -645,10 +645,10 @@ initializeFor: aReceptiveAccount
 	account := aReceptiveAccount ! !
 
 
-!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'PB 5/19/2018 16:23:52'!
+!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'PB 5/19/2018 19:04:39'!
 lines 
-
 	| lines investmentEarningsTotal |
+	
 	ParallelExecutor 
 		do: [lines := (AccountSummaryWithInvestmentEarnings for: account) lines.]
 		AndDo: [investmentEarningsTotal := (InvestmentNetVisitor for: account) value.].
@@ -682,9 +682,8 @@ initializeFor: aReceptiveAccount
 	account := aReceptiveAccount ! !
 
 
-!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'PB 5/19/2018 16:34:13'!
+!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'PB 5/19/2018 19:04:47'!
 lines 
-
 	| lines investmentEarningsTotal |
 	
 	ParallelExecutor 
