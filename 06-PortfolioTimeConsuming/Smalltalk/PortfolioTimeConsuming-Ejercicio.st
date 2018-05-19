@@ -506,7 +506,7 @@ test29ReversePortfolioTreePrinterPrintsTheCompositeStartingFromTheLeaves
 	self assert: 'composedPortfolio' = (lines at: 5).
 	! !
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HAW 8/13/2017 17:52:44'!
+!PortfolioTest methodsFor: 'tests' stamp: 'PB 5/19/2018 16:42:08'!
 test30AccountSummaryWithInvestmentEarningsShouldNotTakeTooLong
 
 	| fromAccount toAccount lines |
@@ -527,8 +527,7 @@ test30AccountSummaryWithInvestmentEarningsShouldNotTakeTooLong
 	self assert: 'Extraccion por 50' =  (lines at: 2).
 	self assert: 'Transferencia por -100' = (lines at: 3).
 	self assert: 'Plazo fijo por 1000 durante 360 dias a una tna de 10%' = (lines at: 4).
-	self assert: 'Ganancias por 100' = (lines at: 5).
-	! !
+	self assert: 'Ganancias por 100' = (lines at: 5).! !
 
 !PortfolioTest methodsFor: 'tests' stamp: 'HAW 8/13/2017 17:52:59'!
 test31AccountSummaryWithInvestmentFullInfoShouldNotTakeTooLong
@@ -646,24 +645,13 @@ initializeFor: aReceptiveAccount
 	account := aReceptiveAccount ! !
 
 
-!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'PB 5/19/2018 16:12:54'!
+!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'PB 5/19/2018 16:23:52'!
 lines 
 
-	| lines investmentEarnings semaphore investmentEarningsTotal |
-	
-	semaphore := Semaphore new.
-	
-	investmentEarnings := InvestmentNetVisitor for: account.
-	[
-		lines := (AccountSummaryWithInvestmentEarnings for: account) lines.
-		semaphore signal.
-	] fork.
-	[
-		investmentEarningsTotal := investmentEarnings value.
-		semaphore signal.
-	] fork.
-	
-	semaphore wait wait.
+	| lines investmentEarningsTotal |
+	ParallelExecutor 
+		do: [lines := (AccountSummaryWithInvestmentEarnings for: account) lines.]
+		AndDo: [investmentEarningsTotal := (InvestmentNetVisitor for: account) value.].
 
 	lines add: 'Inversiones por ', investmentEarningsTotal printString.
 	
@@ -694,24 +682,15 @@ initializeFor: aReceptiveAccount
 	account := aReceptiveAccount ! !
 
 
-!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'PB 5/19/2018 14:58:01'!
+!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'PB 5/19/2018 16:34:13'!
 lines 
 
-	| lines investmentEarnings semahpore investmentEarningsTotal |
-	semahpore := Semaphore new.
+	| lines investmentEarningsTotal |
 	
-	investmentEarnings := InvestmentEarningVisitor for: account.
-	[
-		lines := (AccountSummary for: account) lines.
-		semahpore signal.
-	] fork.
-	
-	[ 
-		investmentEarningsTotal := investmentEarnings value.
-		semahpore signal.
-	] fork.
-	
-	semahpore wait wait.
+	ParallelExecutor 
+		do: [lines := (AccountSummary for: account) lines.] 
+		AndDo: [investmentEarningsTotal := (InvestmentEarningVisitor for: account) value.].
+
 	lines add: 'Ganancias por ', investmentEarningsTotal printString.
 	
 	 ^ lines! !
@@ -1466,6 +1445,37 @@ InvestmentNetVisitor class
 for: aReceptiveAccount 
 	
 	^ self new initializeFor: aReceptiveAccount ! !
+
+
+!classDefinition: #ParallelExecutor category: #'PortfolioTimeConsuming-Ejercicio'!
+Object subclass: #ParallelExecutor
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTimeConsuming-Ejercicio'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'ParallelExecutor class' category: #'PortfolioTimeConsuming-Ejercicio'!
+ParallelExecutor class
+	instanceVariableNames: ''!
+
+!ParallelExecutor class methodsFor: 'instance creation' stamp: 'PB 5/19/2018 16:30:53'!
+do: aClosure AndDo: anotherClosure
+	|semaphore|
+	semaphore := Semaphore new.
+	[
+		aClosure value.
+		semaphore signal.
+	] fork.
+	[
+		anotherClosure value.
+		semaphore signal.
+	] fork.
+	semaphore wait wait.
+
+	
+! !
 
 
 !classDefinition: #ReversePortfolioTreePrinter category: #'PortfolioTimeConsuming-Ejercicio'!
