@@ -646,14 +646,26 @@ initializeFor: aReceptiveAccount
 	account := aReceptiveAccount ! !
 
 
-!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'HernanWilkinson 7/17/2011 23:58'!
+!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'PB 5/19/2018 16:12:54'!
 lines 
 
-	| lines investmentEarnings |
+	| lines investmentEarnings semaphore investmentEarningsTotal |
+	
+	semaphore := Semaphore new.
 	
 	investmentEarnings := InvestmentNetVisitor for: account.
-	lines := (AccountSummaryWithInvestmentEarnings for: account) lines.
-	lines add: 'Inversiones por ', investmentEarnings value printString.
+	[
+		lines := (AccountSummaryWithInvestmentEarnings for: account) lines.
+		semaphore signal.
+	] fork.
+	[
+		investmentEarningsTotal := investmentEarnings value.
+		semaphore signal.
+	] fork.
+	
+	semaphore wait wait.
+
+	lines add: 'Inversiones por ', investmentEarningsTotal printString.
 	
 	 ^ lines! !
 
