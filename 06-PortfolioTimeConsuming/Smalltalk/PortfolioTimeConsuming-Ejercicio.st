@@ -645,17 +645,17 @@ initializeFor: aReceptiveAccount
 	account := aReceptiveAccount ! !
 
 
-!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'PB 5/19/2018 19:04:39'!
+!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'PO 5/23/2018 20:30:06'!
 lines 
 	| lines investmentEarningsTotal |
 	
-	ParallelExecutor 
-		do: [lines := (AccountSummaryWithInvestmentEarnings for: account) lines.]
-		AndDo: [investmentEarningsTotal := (InvestmentNetVisitor for: account) value.].
-
-	lines add: 'Inversiones por ', investmentEarningsTotal printString.
+	lines := AsyncResult from: [(AccountSummaryWithInvestmentEarnings for: account) lines.].
+	investmentEarningsTotal := AsyncResult from: [(InvestmentNetVisitor for: account) value.].
+	lines semaphore wait.
+	investmentEarningsTotal semaphore wait.
+	lines result add: 'Inversiones por ', investmentEarningsTotal result printString.
 	
-	 ^ lines! !
+	 ^ lines result! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -682,17 +682,17 @@ initializeFor: aReceptiveAccount
 	account := aReceptiveAccount ! !
 
 
-!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'PB 5/19/2018 19:04:47'!
+!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'PO 5/23/2018 20:36:37'!
 lines 
 	| lines investmentEarningsTotal |
 	
-	ParallelExecutor 
-		do: [lines := (AccountSummary for: account) lines.] 
-		AndDo: [investmentEarningsTotal := (InvestmentEarningVisitor for: account) value.].
-
-	lines add: 'Ganancias por ', investmentEarningsTotal printString.
+	lines := AsyncResult from: [(AccountSummary for: account) lines.] .
+	investmentEarningsTotal := AsyncResult from:[(InvestmentEarningVisitor for: account) value.].
+	lines semaphore wait.
+	investmentEarningsTotal semaphore wait.
+	lines result add: 'Ganancias por ', investmentEarningsTotal result printString.
 	
-	 ^ lines! !
+	 ^ lines result! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -712,7 +712,6 @@ Object subclass: #AccountTransaction
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTimeConsuming-Ejercicio'!
-
 
 !AccountTransaction methodsFor: 'as yet unclassified' stamp: 'PB 5/10/2018 21:01:02'!
 affectBalance: aBalance from: aTransactionOwner
@@ -768,7 +767,6 @@ AccountTransaction subclass: #CertificateOfDeposit
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTimeConsuming-Ejercicio'!
-
 
 !CertificateOfDeposit methodsFor: 'querying' stamp: 'PabloBalbi 5/17/2018 00:58'!
 query: anAccountSummary 
@@ -1446,6 +1444,42 @@ for: aReceptiveAccount
 	^ self new initializeFor: aReceptiveAccount ! !
 
 
+!classDefinition: #AsyncResult category: #'PortfolioTimeConsuming-Ejercicio'!
+Object subclass: #AsyncResult
+	instanceVariableNames: 'semaphore result'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTimeConsuming-Ejercicio'!
+
+!AsyncResult methodsFor: 'accessing' stamp: 'PO 5/23/2018 20:12:57'!
+result
+	^result! !
+
+!AsyncResult methodsFor: 'accessing' stamp: 'PO 5/23/2018 20:12:50'!
+semaphore
+	^semaphore! !
+
+
+!AsyncResult methodsFor: 'initialization' stamp: 'PO 5/23/2018 18:53:50'!
+from: aBlock
+	semaphore := Semaphore new.
+	[result := aBlock value.
+	semaphore signal] fork.
+	^self! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'AsyncResult class' category: #'PortfolioTimeConsuming-Ejercicio'!
+AsyncResult class
+	instanceVariableNames: ''!
+
+!AsyncResult class methodsFor: 'initialization' stamp: 'PO 5/23/2018 18:49:53'!
+from: aBlock
+	| asyncResult |
+	asyncResult := self new.
+	^asyncResult from: aBlock! !
+
+
 !classDefinition: #ParallelExecutor category: #'PortfolioTimeConsuming-Ejercicio'!
 Object subclass: #ParallelExecutor
 	instanceVariableNames: ''
@@ -1893,7 +1927,6 @@ initializeFor: aValue from: aSourceAccount to: aTargetAccount
 !classDefinition: 'Transfer class' category: #'PortfolioTimeConsuming-Ejercicio'!
 Transfer class
 	instanceVariableNames: ''!
-
 
 !Transfer class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 19:41'!
 for: aValue from: sourceAccount to: targetAccount
