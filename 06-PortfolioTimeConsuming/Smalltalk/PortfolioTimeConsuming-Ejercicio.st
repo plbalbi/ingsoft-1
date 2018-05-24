@@ -1480,37 +1480,6 @@ from: aBlock
 	^asyncResult from: aBlock! !
 
 
-!classDefinition: #ParallelExecutor category: #'PortfolioTimeConsuming-Ejercicio'!
-Object subclass: #ParallelExecutor
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTimeConsuming-Ejercicio'!
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'ParallelExecutor class' category: #'PortfolioTimeConsuming-Ejercicio'!
-ParallelExecutor class
-	instanceVariableNames: ''!
-
-!ParallelExecutor class methodsFor: 'instance creation' stamp: 'PB 5/19/2018 16:30:53'!
-do: aClosure AndDo: anotherClosure
-	|semaphore|
-	semaphore := Semaphore new.
-	[
-		aClosure value.
-		semaphore signal.
-	] fork.
-	[
-		anotherClosure value.
-		semaphore signal.
-	] fork.
-	semaphore wait wait.
-
-	
-! !
-
-
 !classDefinition: #ReversePortfolioTreePrinter category: #'PortfolioTimeConsuming-Ejercicio'!
 Object subclass: #ReversePortfolioTreePrinter
 	instanceVariableNames: 'portfolio accountNames'
