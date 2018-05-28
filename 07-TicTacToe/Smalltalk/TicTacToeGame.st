@@ -250,7 +250,7 @@ test17
 	self deny: game XHasWon.
 	self assert: game OHasWon.! !
 
-!TicTacToeTest methodsFor: 'testing' stamp: 'PB 5/24/2018 21:28:49'!
+!TicTacToeTest methodsFor: 'testing' stamp: 'PB 5/28/2018 18:11:18'!
 test18
 	| game |
 	game _ TicTacToe new.
@@ -261,7 +261,7 @@ test18
 	game putXAt: 1 @ 3.
 	
 	self 
-		should: [game putXAt: 2@2 ]
+		should: [game putOAt: 2@2 ]
 	 	raise:  Error - MessageNotUnderstood 
 		withExceptionDo: [ :anError |
 			self assert: TicTacToe cannotPlayWhenGameIsOverErrorMessage equals: anError messageText.
@@ -270,46 +270,69 @@ test18
 			self assert: (game Os includes: 3@1).
 			].! !
 
-!TicTacToeTest methodsFor: 'testing' stamp: 'PB 5/24/2018 21:32:03'!
+!TicTacToeTest methodsFor: 'testing' stamp: 'PB 5/28/2018 18:16:41'!
 test19
-"TODO: O gana, X quiere jugar"
 	| game |
 	game _ TicTacToe new.
-	game putXAt: 1 @ 1.
-	game putOAt: 2 @ 1.
-	game putXAt: 1 @ 2.
-	game putOAt: 3 @ 1.
-	game putXAt: 1 @ 3.
+	game putXAt: 3 @ 3.
+	game putOAt: 1 @ 1.
+	game putXAt: 2 @ 1.
+	game putOAt: 1 @ 2.
+	game putXAt: 3 @ 1.
+	game putOAt: 1 @ 3.
 	
 	self 
 		should: [game putXAt: 2@2 ]
 	 	raise:  Error - MessageNotUnderstood 
 		withExceptionDo: [ :anError |
 			self assert: TicTacToe cannotPlayWhenGameIsOverErrorMessage equals: anError messageText.
-			self assert: 2 equals: game Os size.
-			self assert: (game Os includes: 2@1).
-			self assert: (game Os includes: 3@1).
+			self assert: 3 equals: game Os size.
+			self assert: (game Xs includes: 2@1).
+			self assert: (game Xs includes: 3@1).
+			self assert: (game Xs includes: 3@3).
 			].! !
 
-!TicTacToeTest methodsFor: 'testing' stamp: 'PB 5/24/2018 21:36:54'!
+!TicTacToeTest methodsFor: 'testing' stamp: 'PB 5/28/2018 18:20:03'!
 test20
-"TODO: empate"
 	| game |
 	game _ TicTacToe new.
 	game putXAt: 1 @ 1.
 	game putOAt: 1 @ 2.
 	game putXAt: 1 @ 3.
-	game putOAt: 2 @ 1.
+	game putOAt: 3 @ 1.
 	game putXAt: 2 @ 2.
 	game putOAt: 2 @ 3.
-	game putXAt: 3 @ 1.
-	game putOAt: 3 @ 2.
-	game putXAt: 3 @ 3.
+	game putXAt: 2 @ 1.
+	game putOAt: 3 @ 3.
+	game putXAt: 3 @ 2.
 			
 	self assert: game isOver.
-	self assert: game XHasWon.
-	self assert: game OHasWon .
+	self deny: game XHasWon.
+	self deny: game OHasWon .
 	self assert: game isTied.! !
+
+!TicTacToeTest methodsFor: 'testing' stamp: 'PB 5/28/2018 18:42:38'!
+test21
+
+	| game |
+	
+	game := TicTacToe new.
+	
+	game putXAt: 2@2.
+	game putOAt: 1@2.	
+	game putXAt: 1@1.
+	game putOAt: 2@1.
+	game putXAt: 1@3.	
+	game putOAt: 2@3.
+	game putXAt: 3@2.	
+	game putOAt: 3@1.
+	game putXAt: 3@3.
+	
+	self assert: game isOver.
+	self assert: game XHasWon. 
+	self deny: game OHasWon. 
+	self deny: game isTied
+! !
 
 
 !classDefinition: #TicTacToe category: #TicTacToeGame!
@@ -334,8 +357,11 @@ failOnOccupiedSlot: aMove
 			[ self error: self class positionTakenErrorMessage. ].! !
 
 
-!TicTacToe methodsFor: 'playing' stamp: 'PB 5/24/2018 21:30:26'!
+!TicTacToe methodsFor: 'playing' stamp: 'PB 5/28/2018 18:13:01'!
 putOAt: aMove 
+	winner ifNotNil: [
+		self error: self class cannotPlayWhenGameIsOverErrorMessage.
+		].
 	(turn = #x) ifTrue: 
 		[
 		self error: self class notOTurnErrorMessage.
@@ -354,11 +380,14 @@ putOAt: aMove
 	
 	turn := #x.! !
 
-!TicTacToe methodsFor: 'playing' stamp: 'PB 5/24/2018 21:08:03'!
+!TicTacToe methodsFor: 'playing' stamp: 'PB 5/28/2018 18:14:08'!
 putXAt: aMove
 	(turn = #o) ifTrue: 
 		[
 		self error: self class notXTurnErrorMessage.
+		].
+	winner ifNotNil: [
+		self error: self class cannotPlayWhenGameIsOverErrorMessage.
 		].
 	self failOnOccupiedSlot: aMove.
 	self Xs add: aMove.
@@ -413,12 +442,20 @@ anyRowCompleted: positions
 			]) = 3.
 		]! !
 
-!TicTacToe methodsFor: 'winning' stamp: 'PB 5/24/2018 21:46:04'!
+!TicTacToe methodsFor: 'winning' stamp: 'PB 5/28/2018 18:37:25'!
+hasWinner
+	^(winner = nil) not! !
+
+!TicTacToe methodsFor: 'winning' stamp: 'PB 5/28/2018 18:34:26'!
 isOver
-self halt.
 "agregar caso en que gano alguno"
-	^((self Xs size + self Os size) = 9) &
-		(winner = nil).! !
+	^self isTied | self hasWinner.! !
+
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'PB 5/28/2018 18:43:29'!
+isTied
+	^((self Xs size + self Os size) = 9) & self hasWinner not
+	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
