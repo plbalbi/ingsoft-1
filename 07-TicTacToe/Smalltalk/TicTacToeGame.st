@@ -5,7 +5,7 @@ TestCase subclass: #TicTacToeTest
 	poolDictionaries: ''
 	category: 'TicTacToStep21'!
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:30'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:30'!
 test01NewGameIsEmpty
 
 	|game|
@@ -16,7 +16,7 @@ test01NewGameIsEmpty
 	self assert: game Os isEmpty.
 	! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:31'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:31'!
 test02XMakesOneMove
 
 	|game|
@@ -31,7 +31,7 @@ test02XMakesOneMove
 	
 	! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:31'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:31'!
 test03XMovesAndOMoves
 
 	|game|
@@ -47,7 +47,7 @@ test03XMovesAndOMoves
 	self assert: (game Os includes: 2@2).
 	! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PB 5/28/2018 21:37:41'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PB 5/28/2018 21:37:41'!
 test04GameFailsWhenXMovesTwice
 
 	|game|
@@ -67,7 +67,28 @@ test04GameFailsWhenXMovesTwice
 		].
 	! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:33'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PB 5/28/2018 21:37:50'!
+test05GameFailsWhenOMovesTwice
+
+	|game|
+	
+	game := TicTacToe new.
+
+	game putXAt: 1@1.
+	game putOAt: 2@2.
+	self
+	should: [game putOAt: 3@3]
+	raise: Error - MessageNotUnderstood
+	withExceptionDo: [ :anError|
+		self assert: (TicTacToe notTurnErrorMessage: #o) equals: anError messageText.	
+		self assert: 1 equals: game Xs size.
+		self assert: (game Xs includes: 1@1).
+		self assert: 1 equals: game Os size.
+		self assert: (game Os includes: 2@2).
+		].
+	! !
+
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:33'!
 test06GameFailsWhenXMovesIntoPositionOccupiedByX
 
 	|game|
@@ -88,7 +109,7 @@ test06GameFailsWhenXMovesIntoPositionOccupiedByX
 		].
 	! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:33'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:33'!
 test07GameFailsWhenXMovesIntoPositionOccupiedByO
 
 	|game|
@@ -109,7 +130,7 @@ test07GameFailsWhenXMovesIntoPositionOccupiedByO
 		].
 	! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:33'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:33'!
 test08GameFailsWhenOMovesIntoPositionOccupiedByX
 
 	|game|
@@ -129,7 +150,7 @@ test08GameFailsWhenOMovesIntoPositionOccupiedByX
 		].
 	! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:34'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:34'!
 test09GameFailsWhenOMovesIntoPositionOccupiedByO
 
 	|game|
@@ -153,7 +174,7 @@ test09GameFailsWhenOMovesIntoPositionOccupiedByO
 		].
 	! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:34'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:34'!
 test10NoPlayerHasWon
 
 	|game|
@@ -168,7 +189,7 @@ test10NoPlayerHasWon
 		self deny: game OHasWon.
 		self deny: game XHasWon.! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:36'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:36'!
 test11XHasWonInFirstRow
 
 	|game|
@@ -185,7 +206,7 @@ test11XHasWonInFirstRow
 		self assert: game XHasWon.
 		self deny: game OHasWon.! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:36'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:36'!
 test12XHasWonInSecondRow
 
 	|game|
@@ -202,7 +223,7 @@ test12XHasWonInSecondRow
 		self assert: game XHasWon.
 		self deny: game OHasWon.! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:36'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:36'!
 test13XHasWonInThirdRow
 
 	|game|
@@ -219,7 +240,7 @@ test13XHasWonInThirdRow
 		self assert: game XHasWon.
 		self deny: game OHasWon.! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:36'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:36'!
 test14XHasWonInFirstColumn
 
 	|game|
@@ -236,7 +257,7 @@ test14XHasWonInFirstColumn
 		self assert: game XHasWon.
 		self deny: game OHasWon.! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:36'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:36'!
 test15XHasWonInSecondColumn
 
 	|game|
@@ -253,7 +274,7 @@ test15XHasWonInSecondColumn
 		self assert: game XHasWon.
 		self deny: game OHasWon.! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:36'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:36'!
 test16XHasWonInThirdColumn
 
 	|game|
@@ -270,7 +291,7 @@ test16XHasWonInThirdColumn
 		self assert: game XHasWon.
 		self deny: game OHasWon.! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:37'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:37'!
 test17OHasWon
 
 	|game|
@@ -287,7 +308,7 @@ test17OHasWon
 		self assert: game OHasWon.
 		self deny: game XHasWon.! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:37'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:37'!
 test18OCannotPlayWhenXHasWon
 
 	| game |
@@ -311,7 +332,7 @@ test18OCannotPlayWhenXHasWon
 			
 			! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:37'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:37'!
 test19XCannotPlayWhenOHasWon
 
 	| game |
@@ -337,7 +358,7 @@ test19XCannotPlayWhenOHasWon
 			
 			! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:38'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:38'!
 test20GameIsTied
 
 	| game |
@@ -360,7 +381,7 @@ test20GameIsTied
 	self assert: game isTied
 ! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'PabloBalbi 5/28/2018 20:38'!
+!TicTacToeTest methodsFor: 'tests' stamp: 'PabloBalbi 5/28/2018 20:38'!
 test21GameOverAndNotTiedWhenPlayerWon
 
 	| game |
@@ -382,28 +403,6 @@ test21GameOverAndNotTiedWhenPlayerWon
 	self deny: game OHasWon. 
 	self deny: game isTied
 ! !
-
-
-!TicTacToeTest methodsFor: 'tests' stamp: 'PB 5/28/2018 21:37:50'!
-test05GameFailsWhenOMovesTwice
-
-	|game|
-	
-	game := TicTacToe new.
-
-	game putXAt: 1@1.
-	game putOAt: 2@2.
-	self
-	should: [game putOAt: 3@3]
-	raise: Error - MessageNotUnderstood
-	withExceptionDo: [ :anError|
-		self assert: (TicTacToe notTurnErrorMessage: #o) equals: anError messageText.	
-		self assert: 1 equals: game Xs size.
-		self assert: (game Xs includes: 1@1).
-		self assert: 1 equals: game Os size.
-		self assert: (game Os includes: 2@2).
-		].
-	! !
 
 
 !classDefinition: #TicTacToe category: #TicTacToStep21!
@@ -524,13 +523,19 @@ intializeWithGame: aGame andPlayer: aPlayer
 	tokens := Set new.! !
 
 
-!PlayedTokens methodsFor: 'as yet unclassified' stamp: 'PB 5/28/2018 21:34:01'!
+!PlayedTokens methodsFor: 'as yet unclassified' stamp: 'PB 5/31/2018 01:25:07'!
 add: aMove
 
-	game canPlayAndIsValidPosition: aMove.
+	self canPlayAndIsValidPosition: aMove.
 	(game currentTurn = player) ifFalse: [ self error: (TicTacToe notTurnErrorMessage: player) ].
 	tokens add: aMove.
 	(self won) ifTrue: [ game win: player ].! !
+
+!PlayedTokens methodsFor: 'as yet unclassified' stamp: 'PB 5/31/2018 01:30:52'!
+canPlayAndIsValidPosition: aPosition
+	game isGameOver ifTrue: [ self error: TicTacToe canNotPlayWhenGameIsOverErrorMessage ].
+	(game Xs includes: aPosition) ifTrue: [ self error: TicTacToe positionTakenErrorMessage ].
+	(game Os includes: aPosition) ifTrue: [ self error: TicTacToe positionTakenErrorMessage ].! !
 
 !PlayedTokens methodsFor: 'as yet unclassified' stamp: 'PB 5/28/2018 21:14:32'!
 doesNotUnderstand: aMessage
