@@ -1091,14 +1091,9 @@ stateNameForPlayingX
 	^'Playing X'! !
 
 
-!TicTacToeViewer methodsFor: 'game querying' stamp: 'PB 6/4/2018 08:44:10'!
+!TicTacToeViewer methodsFor: 'game querying' stamp: 'PB 6/4/2018 09:08:00'!
 whoPlayedInMark: aPosition
-	^board at: aPosition
-"""
-	(game playerXPositions includes: aPosition) ifTrue: [^'X'].
-	(game playerOPositions includes: aPosition) ifTrue: [^'O'].
-	^' '
-"""! !
+	^board at: aPosition! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
