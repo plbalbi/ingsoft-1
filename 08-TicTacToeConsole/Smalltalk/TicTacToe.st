@@ -832,12 +832,17 @@ shouldBeTiedWhenNoOneWon
 	^ playerXPositions size = 5 and: [ playerOPositions size = 4 ].! !
 
 
-!TicTacToe methodsFor: 'accessing' stamp: 'PB 6/3/2018 17:34:13'!
+!TicTacToe methodsFor: 'observer attachment' stamp: 'PB 6/4/2018 00:54:28'!
+attach: aTicTacToeObserver
+
+	notifier attach: aTicTacToeObserver.! !
+
+
+!TicTacToe methodsFor: 'namings' stamp: 'PB 6/3/2018 17:34:13'!
 currentStateNameFor: aTicTacToeStateConsumer
 	^state stateName: aTicTacToeStateConsumer! !
 
-
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'PB 6/3/2018 17:43:15'!
+!TicTacToe methodsFor: 'namings' stamp: 'PB 6/3/2018 17:43:15'!
 lastPlayerName
 	^state lastPlayerName ! !
 
