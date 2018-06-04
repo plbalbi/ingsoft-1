@@ -104,6 +104,55 @@ assertExpectedLogs: expectedLogs equalTo: logs
 		].! !
 
 
+!classDefinition: #TicTacToeNotifierTest category: #TicTacToe!
+TestCase subclass: #TicTacToeNotifierTest
+	instanceVariableNames: 'observers game viewer console'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeNotifierTest methodsFor: 'testing' stamp: 'PB 6/4/2018 13:58:39'!
+test01NotificationsAttendedByMultipleObservers
+	| expectedLogs |
+	
+	expectedLogs := {
+		'X marcó en 2@2'.
+		'Estado: Jugando O'.	
+	}.
+	
+	game markAll: {2@2}.
+	
+	self assertExpectedLogs: expectedLogs equalTo: console logs.
+	self assert: 
+' | | 
+-----
+ |X| 
+-----
+ | | 
+Playing O'
+		equals: viewer view.! !
+
+
+!TicTacToeNotifierTest methodsFor: 'asserts' stamp: 'PB 6/4/2018 13:58:13'!
+assertExpectedLogs: expectedLogs equalTo: logs
+
+	self assert: expectedLogs size equals: logs size.
+	
+	(1 to: logs size) do: [ :index |
+		self assert: (expectedLogs at: index) equals: (logs at: index).
+		].! !
+
+
+!TicTacToeNotifierTest methodsFor: 'preparation' stamp: 'PB 6/4/2018 13:57:35'!
+setUp
+	game  := TicTacToe new.
+	console := TicTacToeConsole new.
+	viewer := TicTacToeViewer new.
+	game
+		attach: console;
+		attach: viewer.! !
+
+
 !classDefinition: #TicTacToeTest category: #TicTacToe!
 TestCase subclass: #TicTacToeTest
 	instanceVariableNames: 'game'
