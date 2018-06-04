@@ -540,7 +540,7 @@ TestCase subclass: #TicTacToeViewerTests
 	poolDictionaries: ''
 	category: 'TicTacToe'!
 
-!TicTacToeViewerTests methodsFor: 'testing' stamp: 'PB 6/3/2018 23:47:32'!
+!TicTacToeViewerTests methodsFor: 'testing' stamp: 'PB 6/4/2018 00:49:05'!
 test01ViewerShowsXPlays
 
 	game markAll: {2 @ 2}.
@@ -1028,27 +1028,27 @@ notify
 """! !
 
 
-!TicTacToeViewer methodsFor: 'viewing' stamp: 'PB 6/4/2018 00:16:19'!
+!TicTacToeViewer methodsFor: 'viewing' stamp: 'PB 6/4/2018 00:50:04'!
 view
 
 | gameView |
 
-gameView := ''.
+gameView := WriteStream with: ''.
 
 (1 to: 3) do:[ :row |
-	(1 to: 3) do: [ :column |
-			gameView := gameView , (self whoPlayedInMark: row@column).
-			column ~= 3 ifTrue: [gameView := gameView , '|'] 
+(1 to: 3) do: [ :column |
+		gameView nextPutAll: (self whoPlayedInMark: row@column).
+		column ~= 3 ifTrue: [gameView nextPut: '|' asCharacter] 
+	].
+	gameView newLine.
+	row ~= 3 ifTrue: [
+		gameView  nextPutAll: self class rowSeparator. gameView newLine .
 		].
-		gameView := gameView , self class newLine.
-		row ~= 3 ifTrue: [
-			gameView := gameView , self class rowSeparator , self class newLine.
-			].
 	].
 
-gameView := gameView , self currentGameState .
+gameView nextPutAll: self currentGameState .
 
-^gameView! !
+^gameView contents ! !
 
 
 !TicTacToeViewer methodsFor: 'state naming' stamp: 'PB 6/3/2018 20:43:34'!
