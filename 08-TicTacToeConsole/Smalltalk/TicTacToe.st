@@ -1015,25 +1015,38 @@ stateNameForPlayingX
 
 !classDefinition: #TicTacToeViewer category: #TicTacToe!
 TicTacToeObserver subclass: #TicTacToeViewer
-	instanceVariableNames: 'currentState'
+	instanceVariableNames: 'currentState board'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TicTacToe'!
 
-!TicTacToeViewer methodsFor: 'initializing' stamp: 'PB 6/4/2018 00:21:49'!
-initalize
-	currentState := 'No moves made yet'! !
+!TicTacToeViewer methodsFor: 'initializing' stamp: 'PB 6/4/2018 08:48:53'!
+initialize
+"Initialize board with empty plays, since Array2D doest not provide an ifAbsent,
+and adding a hanlder would mean having to deal with sth like 
+
+(board at: aPosition) ifNil: [^' '] ''
+
+"
+	currentState := 'No moves made yet'.
+	board := Array2D width: 3 height: 3.
+	1 to: 3 do: [ :row |
+		1 to: 3 do: [:column | board at: row@column put: ' ' ]
+		]! !
 
 
-!TicTacToeViewer methodsFor: 'notifications' stamp: 'PB 6/4/2018 00:24:59'!
+!TicTacToeViewer methodsFor: 'notifications' stamp: 'PB 6/4/2018 08:52:14'!
 notify
+	board at: game lastPlay put: game lastPlayerName .
+
+	
 """
 	currentState := self currentGameState.
 	self updateGameView.
 """! !
 
 
-!TicTacToeViewer methodsFor: 'viewing' stamp: 'PB 6/4/2018 00:50:04'!
+!TicTacToeViewer methodsFor: 'viewing' stamp: 'PB 6/4/2018 08:52:58'!
 view
 
 | gameView |
@@ -1047,7 +1060,8 @@ gameView := WriteStream with: ''.
 	].
 	gameView newLine.
 	row ~= 3 ifTrue: [
-		gameView  nextPutAll: self class rowSeparator. gameView newLine .
+		gameView  nextPutAll: self class rowSeparator. 
+		gameView newLine .
 		].
 	].
 
@@ -1077,12 +1091,14 @@ stateNameForPlayingX
 	^'Playing X'! !
 
 
-!TicTacToeViewer methodsFor: 'game querying' stamp: 'PB 6/4/2018 00:24:43'!
+!TicTacToeViewer methodsFor: 'game querying' stamp: 'PB 6/4/2018 08:44:10'!
 whoPlayedInMark: aPosition
+	^board at: aPosition
+"""
 	(game playerXPositions includes: aPosition) ifTrue: [^'X'].
 	(game playerOPositions includes: aPosition) ifTrue: [^'O'].
 	^' '
-! !
+"""! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
