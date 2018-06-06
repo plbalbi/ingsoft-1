@@ -5,6 +5,14 @@ TestCase subclass: #MarketTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
+!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:32:31'!
+test001NewBookHasName
+
+	|book|
+	book := Book withName: 'awesome book'.
+	self assert: (book name) equals: 'awesome book'.
+	! !
+
 !MarketTest methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:18:37'!
 test01EmptyCartHasNoElements
 	
@@ -14,12 +22,12 @@ test01EmptyCartHasNoElements
 	
 	self assert: cart isEmpty.! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:21:28'!
+!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:41:54'!
 test02BookCanBeAddedToCart
 	
 	|cart book|
 	
-	book := 'awesome book'.
+	book := Book withName: 'awesome book'.
 	
 	cart := Cart new.
 	cart addBook: book.
@@ -27,12 +35,12 @@ test02BookCanBeAddedToCart
 	self deny: cart isEmpty.
 	self assert: (cart contains: book).! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:31:30'!
+!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:42:56'!
 test03SameBookCanBeAddedMultipleTimes
 	
 	|cart book bookQuantity |
 	
-	book := 'awesome book'.
+	book := Book withName: 'awesome book'.
 	bookQuantity := 3.
 	
 	cart := Cart new.
@@ -42,13 +50,13 @@ test03SameBookCanBeAddedMultipleTimes
 	self assert: (cart contains: book).
 	self assert: (cart quantity: book) equals: bookQuantity.! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:33:10'!
+!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:43:50'!
 test04DifferentBooksCanBeAddedToCart
 	
 	|cart book anotherBook |
 	
-	book := 'awesome book'.
-	anotherBook := 'another awesome book'.
+	book := Book withName: 'awesome book'.
+	anotherBook := Book withName: 'another awesome book'.
 	
 	cart := Cart new.
 	cart addBook: book.
@@ -58,14 +66,14 @@ test04DifferentBooksCanBeAddedToCart
 	self assert: (cart contains: book).
 	self assert: (cart contains: anotherBook).! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:36:12'!
+!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:44:12'!
 test05DifferentBooksCanBeAddedToCartMultipleTimes
 
 	| cart book anotherBook anotherBookQuantity bookQuantity |
 	
-	book _ 'awesome book'.
+	book := Book withName: 'awesome book'.
 	bookQuantity := 3.
-	anotherBook _ 'another awesome book'.
+	anotherBook _ Book withName: 'another awesome book'.
 	anotherBookQuantity := 5.
 	
 	cart _ Cart new.
@@ -77,12 +85,12 @@ test05DifferentBooksCanBeAddedToCartMultipleTimes
 	self assert: anotherBookQuantity equals: (cart quantity: anotherBook).
 ! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:40:31'!
+!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:44:21'!
 test06ABookCanBeRemovedFromCart
 
 	| cart book |
 	
-	book _ 'awesome book'.
+	book := Book withName: 'awesome book'.
 	
 	cart _ Cart new.
 	cart addBook: book.
@@ -90,12 +98,12 @@ test06ABookCanBeRemovedFromCart
 	
 	self assert: cart isEmpty.! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:43:15'!
+!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:44:26'!
 test07BookCanBeRemovedMultipleTimesFromCart
 
 	| cart book bookQuantity |
 	
-	book _ 'awesome book'.
+	book := Book withName: 'awesome book'.
 	bookQuantity := 3.
 	
 	cart _ Cart new.
@@ -104,12 +112,12 @@ test07BookCanBeRemovedMultipleTimesFromCart
 	
 	self assert: cart isEmpty.! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:48:08'!
+!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:44:32'!
 test08CantRemoveBookThatIsNotInCart
 
 	| cart book |
 	
-	book _ 'awesome book'.
+	book := Book withName: 'awesome book'.
 	
 	cart _ Cart new.
 	
@@ -122,6 +130,33 @@ test08CantRemoveBookThatIsNotInCart
 			self assert: cart isEmpty.
 			self assert: Cart cantRemoveBookNotAdded equals: error messageText.
 			]! !
+
+
+!classDefinition: #Book category: #TusLibros!
+Object subclass: #Book
+	instanceVariableNames: 'name'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!Book methodsFor: 'initialization' stamp: 'PO 6/6/2018 15:31:11'!
+withName: aName 
+	name := aName.! !
+
+
+!Book methodsFor: 'accessing' stamp: 'PO 6/6/2018 15:39:07'!
+name
+	^name! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Book class' category: #TusLibros!
+Book class
+	instanceVariableNames: ''!
+
+!Book class methodsFor: 'initialization' stamp: 'PO 6/6/2018 15:29:50'!
+withName: aName 
+	^ self new withName: aName.! !
 
 
 !classDefinition: #Cart category: #TusLibros!
