@@ -5,15 +5,7 @@ TestCase subclass: #MarketTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:32:31'!
-test001NewBookHasName
-
-	|book|
-	book := Book withName: 'awesome book'.
-	self assert: (book name) equals: 'awesome book'.
-	! !
-
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:18:37'!
+!MarketTest methodsFor: 'tests' stamp: 'PB 6/4/2018 21:18:37'!
 test01EmptyCartHasNoElements
 	
 	|cart|
@@ -22,7 +14,7 @@ test01EmptyCartHasNoElements
 	
 	self assert: cart isEmpty.! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:41:54'!
+!MarketTest methodsFor: 'tests' stamp: 'PO 6/6/2018 15:41:54'!
 test02BookCanBeAddedToCart
 	
 	|cart book|
@@ -35,7 +27,7 @@ test02BookCanBeAddedToCart
 	self deny: cart isEmpty.
 	self assert: (cart contains: book).! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:42:56'!
+!MarketTest methodsFor: 'tests' stamp: 'PO 6/6/2018 15:42:56'!
 test03SameBookCanBeAddedMultipleTimes
 	
 	|cart book bookQuantity |
@@ -50,7 +42,7 @@ test03SameBookCanBeAddedMultipleTimes
 	self assert: (cart contains: book).
 	self assert: (cart quantity: book) equals: bookQuantity.! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:43:50'!
+!MarketTest methodsFor: 'tests' stamp: 'PO 6/6/2018 15:43:50'!
 test04DifferentBooksCanBeAddedToCart
 	
 	|cart book anotherBook |
@@ -66,7 +58,7 @@ test04DifferentBooksCanBeAddedToCart
 	self assert: (cart contains: book).
 	self assert: (cart contains: anotherBook).! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:44:12'!
+!MarketTest methodsFor: 'tests' stamp: 'PO 6/6/2018 15:44:12'!
 test05DifferentBooksCanBeAddedToCartMultipleTimes
 
 	| cart book anotherBook anotherBookQuantity bookQuantity |
@@ -85,7 +77,7 @@ test05DifferentBooksCanBeAddedToCartMultipleTimes
 	self assert: anotherBookQuantity equals: (cart quantity: anotherBook).
 ! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:44:21'!
+!MarketTest methodsFor: 'tests' stamp: 'PO 6/6/2018 15:44:21'!
 test06ABookCanBeRemovedFromCart
 
 	| cart book |
@@ -98,7 +90,7 @@ test06ABookCanBeRemovedFromCart
 	
 	self assert: cart isEmpty.! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:44:26'!
+!MarketTest methodsFor: 'tests' stamp: 'PO 6/6/2018 15:44:26'!
 test07BookCanBeRemovedMultipleTimesFromCart
 
 	| cart book bookQuantity |
@@ -112,7 +104,7 @@ test07BookCanBeRemovedMultipleTimesFromCart
 	
 	self assert: cart isEmpty.! !
 
-!MarketTest methodsFor: 'as yet unclassified' stamp: 'PO 6/6/2018 15:44:32'!
+!MarketTest methodsFor: 'tests' stamp: 'PB 6/7/2018 08:57:08'!
 test08CantRemoveBookThatIsNotInCart
 
 	| cart book |
@@ -128,8 +120,50 @@ test08CantRemoveBookThatIsNotInCart
 		raise: Error - MessageNotUnderstood 
 		withExceptionDo: [ :error |
 			self assert: cart isEmpty.
-			self assert: Cart cantRemoveBookNotAdded equals: error messageText.
+			self assert: error messageText equals: Cart cantRemoveBookNotAdded.
 			]! !
+
+!MarketTest methodsFor: 'tests' stamp: 'PB 6/7/2018 08:58:00'!
+test09NewBookHasName
+	| book |
+	book _ Book withName: 'awesome book'.
+	self
+		assert: book name
+		equals: 'awesome book'.! !
+
+!MarketTest methodsFor: 'tests' stamp: 'PB 6/7/2018 09:26:31'!
+test10BookCannotBeAddedIfNotInCatalog
+
+	| cart book bookNotInCatalog catalog |
+	
+	book := Book withName: 'awesome book'.
+	bookNotInCatalog := Book withName: 'im not in the catalog'.
+	catalog := Catalog with: {book}.
+	
+	cart _ Cart newWithCatalog: catalog.
+
+	self 
+		should: [cart addBook: bookNotInCatalog] 
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [ :error |
+			self assert: Cart errorCannotAddBookNotInCatalog equals: error messageText.
+			self assert: cart isEmpty.
+			].! !
+
+!MarketTest methodsFor: 'tests' stamp: 'PB 6/7/2018 09:34:16'!
+test11BookInCatalogCanBeAdded
+
+	| cart book catalog |
+	
+	book := Book withName: 'awesome book'.
+	catalog := Catalog with: {book}.
+	
+	cart _ Cart newWithCatalog: catalog.
+
+	cart addBook: book.
+
+	self deny: cart isEmpty.
+	self assert: (cart contains: book).! !
 
 
 !classDefinition: #Book category: #TusLibros!
@@ -161,37 +195,45 @@ withName: aName
 
 !classDefinition: #Cart category: #TusLibros!
 Object subclass: #Cart
-	instanceVariableNames: 'books'
+	instanceVariableNames: 'books catalog'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:21:55'!
-addBook: aBook 
-	books add: aBook.! !
-
-!Cart methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:26:29'!
+!Cart methodsFor: 'querying' stamp: 'PB 6/4/2018 21:26:29'!
 contains: aBook 
 	^books includes: aBook ! !
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:22:28'!
-initialize
-
-	books := OrderedCollection new.! !
-
-!Cart methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:23:48'!
+!Cart methodsFor: 'querying' stamp: 'PB 6/4/2018 21:23:48'!
 isEmpty
 	^books isEmpty ! !
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:38:29'!
+!Cart methodsFor: 'querying' stamp: 'PB 6/4/2018 21:38:29'!
 quantity: aBook
 	^books count: [ :bookInCart | bookInCart = aBook ]! !
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'PB 6/4/2018 21:50:12'!
+
+!Cart methodsFor: 'buying' stamp: 'PB 6/7/2018 09:30:04'!
+addBook: aBook 
+	(catalog isPresent: aBook) ifFalse: [ self error: self class errorCannotAddBookNotInCatalog. ].
+	books add: aBook.! !
+
+!Cart methodsFor: 'buying' stamp: 'PB 6/4/2018 21:50:12'!
 removeBook: aBook 
 	[ books remove: aBook ] 
 		on: Error
 		do: [self error: self class cantRemoveBookNotAdded ]! !
+
+
+!Cart methodsFor: 'initialization' stamp: 'PB 6/7/2018 09:28:03'!
+initialize
+	catalog := NoCatalog new.
+	books := OrderedCollection new.! !
+
+!Cart methodsFor: 'initialization' stamp: 'PB 6/7/2018 09:22:45'!
+withCatalog: aCatalog 
+	catalog := aCatalog.
+	^self! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -202,3 +244,61 @@ Cart class
 !Cart class methodsFor: 'accessing class hierarchy' stamp: 'PB 6/4/2018 21:47:46'!
 cantRemoveBookNotAdded
 	^'Cannot remove book that was not added to cart'! !
+
+
+!Cart class methodsFor: 'class initialization' stamp: 'PB 6/7/2018 09:22:16'!
+newWithCatalog: aCatalog 
+	^self new withCatalog: aCatalog.! !
+
+
+!Cart class methodsFor: 'error messages' stamp: 'PB 6/7/2018 09:26:20'!
+errorCannotAddBookNotInCatalog
+	^'Cannot add book that is not in catalog'! !
+
+
+!classDefinition: #Catalog category: #TusLibros!
+Object subclass: #Catalog
+	instanceVariableNames: 'books'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!Catalog methodsFor: 'initialization' stamp: 'PB 6/7/2018 09:31:17'!
+initialize
+	books := OrderedCollection new.! !
+
+!Catalog methodsFor: 'initialization' stamp: 'PB 6/7/2018 09:21:41'!
+with: someBooks
+	books := OrderedCollection new.
+	someBooks do: [:book | books add: book].
+	^self! !
+
+
+!Catalog methodsFor: 'querying' stamp: 'PB 6/7/2018 09:31:33'!
+isPresent: aBook 
+	^books includes: aBook.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Catalog class' category: #TusLibros!
+Catalog class
+	instanceVariableNames: ''!
+
+!Catalog class methodsFor: 'as yet unclassified' stamp: 'PB 6/7/2018 09:20:34'!
+with: someBooks
+	^self new with: someBooks.! !
+
+
+!classDefinition: #NoCatalog category: #TusLibros!
+Catalog subclass: #NoCatalog
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+!NoCatalog commentStamp: '<historical>' prior: 0!
+Equivalent to not having a catalog. Null object pattern.!
+
+
+!NoCatalog methodsFor: 'as yet unclassified' stamp: 'PB 6/7/2018 09:32:06'!
+isPresent: aBook.
+	^true.! !
