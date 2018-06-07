@@ -286,9 +286,9 @@ Object subclass: #Catalog
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Catalog methodsFor: 'initialization' stamp: 'PB 6/7/2018 09:31:17'!
+!Catalog methodsFor: 'initialization' stamp: 'PB 6/7/2018 15:11:54'!
 initialize
-	books := OrderedCollection new.! !
+	books := Set new.! !
 
 !Catalog methodsFor: 'initialization' stamp: 'PB 6/7/2018 09:21:41'!
 with: someBooks
