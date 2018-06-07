@@ -1,3 +1,35 @@
+!classDefinition: 'awesome book' category: nil!
+Object subclass: 'awesome book'
+	instanceVariableNames: 'name'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'nil'!
+
+!awesome book methodsFor: 'initialization' stamp: 'PO 6/6/2018 15:31:11'!
+withName: aName 
+	name := aName.! !
+
+
+!awesome book methodsFor: 'accessing' stamp: 'PO 6/6/2018 15:39:07'!
+name
+	^name! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'awesome book class' category: nil!
+awesome book class
+	instanceVariableNames: 'isbn'!
+
+!awesome book class methodsFor: 'initialization' stamp: 'PO 6/6/2018 15:29:50'!
+withName: aName 
+	^ self new withName: aName.! !
+
+!awesome book class methodsFor: 'initialization' stamp: 'PO 6/7/2018 16:24:05'!
+withName: aName andISBN: anISBN 
+	name:= aName.
+	isbn:= anISBN! !
+
+
 !classDefinition: #MarketTest category: #TusLibros!
 TestCase subclass: #MarketTest
 	instanceVariableNames: ''
@@ -188,32 +220,13 @@ test13CanAddBooksToCatalog
 	{book. anotherBook. otherBook} do: [ :bookToCheck |
 		self assert: (catalog isPresent: bookToCheck) ].! !
 
-
-!classDefinition: #Book category: #TusLibros!
-Object subclass: #Book
-	instanceVariableNames: 'name'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'TusLibros'!
-
-!Book methodsFor: 'initialization' stamp: 'PO 6/6/2018 15:31:11'!
-withName: aName 
-	name := aName.! !
-
-
-!Book methodsFor: 'accessing' stamp: 'PO 6/6/2018 15:39:07'!
-name
-	^name! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'Book class' category: #TusLibros!
-Book class
-	instanceVariableNames: ''!
-
-!Book class methodsFor: 'initialization' stamp: 'PO 6/6/2018 15:29:50'!
-withName: aName 
-	^ self new withName: aName.! !
+!MarketTest methodsFor: 'tests' stamp: 'PO 6/7/2018 16:23:18'!
+test14NewBookHasNameAndISBN
+	| book |
+	book _ Book withName: 'awesome book' andISBN:	11111111.
+	self
+		assert: book name
+		equals: 'awesome book'.! !
 
 
 !classDefinition: #Cart category: #TusLibros!
