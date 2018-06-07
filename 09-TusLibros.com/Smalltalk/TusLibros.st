@@ -165,6 +165,38 @@ test11BookInCatalogCanBeAdded
 	self deny: cart isEmpty.
 	self assert: (cart contains: book).! !
 
+!MarketTest methodsFor: 'tests' stamp: 'PB 6/7/2018 09:43:39'!
+test11BooksInCatalogCanBeAdded
+
+	| cart book catalog anotherBook someOtherBook |
+	
+	book := Book withName: 'awesome book'.
+	anotherBook := Book withName: 'another awesome book'.
+	someOtherBook := Book withName: 'great book'.
+	catalog := Catalog with: {book. anotherBook . someOtherBook }.
+	
+	cart _ Cart newWithCatalog: catalog.
+
+	cart addBook: book.
+	cart addBook: anotherBook .
+	cart addBook: someOtherBook .
+
+	self deny: cart isEmpty.
+	self assert: (cart contains: book).
+	self assert: (cart contains: anotherBook ).
+	self assert: (cart contains: someOtherBook).! !
+
+!MarketTest methodsFor: 'tests' stamp: 'PB 6/7/2018 09:42:04'!
+test12BooksInCatalogCanBeAdded
+	| cart book catalog |
+	book _ Book withName: 'awesome book'.
+	catalog _ Catalog with:
+		{book}.
+	cart _ Cart newWithCatalog: catalog.
+	cart addBook: book.
+	self deny: cart isEmpty.
+	self assert: (cart contains: book).! !
+
 
 !classDefinition: #Book category: #TusLibros!
 Object subclass: #Book
