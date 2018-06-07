@@ -165,27 +165,6 @@ test11BookInCatalogCanBeAdded
 	self deny: cart isEmpty.
 	self assert: (cart contains: book).! !
 
-!MarketTest methodsFor: 'tests' stamp: 'PB 6/7/2018 09:43:39'!
-test11BooksInCatalogCanBeAdded
-
-	| cart book catalog anotherBook someOtherBook |
-	
-	book := Book withName: 'awesome book'.
-	anotherBook := Book withName: 'another awesome book'.
-	someOtherBook := Book withName: 'great book'.
-	catalog := Catalog with: {book. anotherBook . someOtherBook }.
-	
-	cart _ Cart newWithCatalog: catalog.
-
-	cart addBook: book.
-	cart addBook: anotherBook .
-	cart addBook: someOtherBook .
-
-	self deny: cart isEmpty.
-	self assert: (cart contains: book).
-	self assert: (cart contains: anotherBook ).
-	self assert: (cart contains: someOtherBook).! !
-
 !MarketTest methodsFor: 'tests' stamp: 'PB 6/7/2018 09:42:04'!
 test12BooksInCatalogCanBeAdded
 	| cart book catalog |
@@ -196,6 +175,18 @@ test12BooksInCatalogCanBeAdded
 	cart addBook: book.
 	self deny: cart isEmpty.
 	self assert: (cart contains: book).! !
+
+!MarketTest methodsFor: 'tests' stamp: 'PB 6/7/2018 15:09:28'!
+test13CanAddBooksToCatalog
+	| anotherBook book catalog otherBook |
+	book _ Book withName: 'awsome book'.
+	anotherBook _ Book withName: 'another awsome book'.
+	otherBook _ Book withName: 'other awsome book'.
+	catalog _ Catalog with:
+		{book. anotherBook}.
+	catalog addBook: otherBook.
+	{book. anotherBook. otherBook} do: [ :bookToCheck |
+		self assert: (catalog isPresent: bookToCheck) ].! !
 
 
 !classDefinition: #Book category: #TusLibros!
@@ -309,6 +300,11 @@ with: someBooks
 !Catalog methodsFor: 'querying' stamp: 'PB 6/7/2018 09:31:33'!
 isPresent: aBook 
 	^books includes: aBook.! !
+
+
+!Catalog methodsFor: 'as yet unclassified' stamp: 'PB 6/7/2018 15:08:19'!
+addBook: aBook. 
+	books add: aBook.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
