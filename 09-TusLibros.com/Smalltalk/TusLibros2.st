@@ -14,13 +14,17 @@ createCart
 	
 	^Cart acceptingItemsOf: self defaultCatalog! !
 
-!TusLibrosTest methodsFor: 'support' stamp: 'PO 6/7/2018 20:54:41'!
+!TusLibrosTest methodsFor: 'support' stamp: 'PB 6/10/2018 16:46:00'!
 createInvalidCard
-	^TestCard withNumber: 4321 andExpirationDate: (FixedGregorianDate yearNumber: 2001 monthNumber: 01 dayNumber: 10) andOwner: 'Juancito' andToday: self today! !
+	| invalidExpirationDate |
+	invalidExpirationDate _ GregorianMonthOfYear year: 2001 month: 1.
+	^TestCard withNumber: 4321 andExpirationDate: invalidExpirationDate andOwner: 'Juancito' andToday: self today! !
 
-!TusLibrosTest methodsFor: 'support' stamp: 'PO 6/7/2018 20:46:33'!
+!TusLibrosTest methodsFor: 'support' stamp: 'PB 6/10/2018 16:50:50'!
 createValidCard
-	^TestCard withNumber: 1234 andExpirationDate: (FixedGregorianDate yearNumber: 2003 monthNumber: 01 dayNumber: 10) andOwner: 'Pepito' andToday: self today! !
+	| validExpirationDate |
+	validExpirationDate _ GregorianMonthOfYear year: 2003 month: 1.
+	^TestCard withNumber: 1234 andExpirationDate: validExpirationDate andOwner: 'Pepito' andToday: self today! !
 
 !TusLibrosTest methodsFor: 'support' stamp: 'PO 6/7/2018 18:59:05'!
 defaultCatalog
@@ -38,9 +42,14 @@ itemSellByTheStore
 	^ 'validBook'! !
 
 
-!TusLibrosTest methodsFor: '*DenotativeObject' stamp: 'PO 6/7/2018 20:47:52'!
+!TusLibrosTest methodsFor: '*DenotativeObject' stamp: 'PB 6/10/2018 16:44:33'!
 today
-	^ (FixedGregorianDate yearNumber: 2002 monthNumber: 01 dayNumber: 10).! !
+	^GregorianMonthOfYear year: 2002 month: 1.
+
+"	^ FixedGregorianDate
+		yearNumber: 2002
+		monthNumber: 1
+		dayNumber: 10. "! !
 
 
 !classDefinition: #CartTest category: #TusLibros!
@@ -193,7 +202,7 @@ test03CashierCalculatesCostCorrectly
 
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'PO 6/7/2018 20:07:02'!
+!CashierTest methodsFor: 'tests' stamp: 'PB 6/10/2018 16:39:35'!
 test04CashierCalculatesCostOfManyItemsCart
 	| cart cost |
 	cart _ self createCart.
@@ -202,7 +211,7 @@ test04CashierCalculatesCostOfManyItemsCart
 		of: self itemSellByTheStore.
 	cost _ cashier calculateCost: cart.
 	self
-		assert: 30
+		assert: self costOfItemSellByTheStore * 3
 		equals: cost.! !
 
 !CashierTest methodsFor: 'tests' stamp: 'PO 6/7/2018 20:52:34'!
