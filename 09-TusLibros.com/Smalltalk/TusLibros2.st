@@ -5,51 +5,47 @@ TestCase subclass: #TusLibrosTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosTest methodsFor: 'support' stamp: 'PO 6/7/2018 19:38:55'!
+!TusLibrosTest methodsFor: 'mock entities' stamp: 'PO 6/7/2018 19:38:55'!
 costOfItemSellByTheStore
 	^10! !
 
-!TusLibrosTest methodsFor: 'support' stamp: 'PO 6/7/2018 18:58:55'!
+!TusLibrosTest methodsFor: 'mock entities' stamp: 'PO 6/7/2018 18:58:55'!
 createCart
 	
 	^Cart acceptingItemsOf: self defaultCatalog! !
 
-!TusLibrosTest methodsFor: 'support' stamp: 'PB 6/10/2018 16:46:00'!
+!TusLibrosTest methodsFor: 'mock entities' stamp: 'PB 6/10/2018 16:46:00'!
 createInvalidCard
 	| invalidExpirationDate |
 	invalidExpirationDate _ GregorianMonthOfYear year: 2001 month: 1.
 	^TestCard withNumber: 4321 andExpirationDate: invalidExpirationDate andOwner: 'Juancito' andToday: self today! !
 
-!TusLibrosTest methodsFor: 'support' stamp: 'PB 6/10/2018 16:50:50'!
+!TusLibrosTest methodsFor: 'mock entities' stamp: 'PB 6/10/2018 16:50:50'!
 createValidCard
 	| validExpirationDate |
 	validExpirationDate _ GregorianMonthOfYear year: 2003 month: 1.
 	^TestCard withNumber: 1234 andExpirationDate: validExpirationDate andOwner: 'Pepito' andToday: self today! !
 
-!TusLibrosTest methodsFor: 'support' stamp: 'PO 6/7/2018 18:59:05'!
+!TusLibrosTest methodsFor: 'mock entities' stamp: 'PO 6/7/2018 18:59:05'!
 defaultCatalog
 	
 	^ Array with: self itemSellByTheStore! !
 
-!TusLibrosTest methodsFor: 'support' stamp: 'PO 6/7/2018 18:59:14'!
+!TusLibrosTest methodsFor: 'mock entities' stamp: 'PO 6/7/2018 18:59:14'!
 itemNotSellByTheStore
 	
 	^'invalidBook'! !
 
-!TusLibrosTest methodsFor: 'support' stamp: 'PO 6/7/2018 18:59:27'!
+!TusLibrosTest methodsFor: 'mock entities' stamp: 'PO 6/7/2018 18:59:27'!
 itemSellByTheStore
 	
 	^ 'validBook'! !
 
-
-!TusLibrosTest methodsFor: '*DenotativeObject' stamp: 'PB 6/10/2018 16:44:33'!
+!TusLibrosTest methodsFor: 'mock entities' stamp: 'PB 6/10/2018 16:56:06'!
 today
-	^GregorianMonthOfYear year: 2002 month: 1.
-
-"	^ FixedGregorianDate
-		yearNumber: 2002
-		monthNumber: 1
-		dayNumber: 10. "! !
+	^ GregorianMonthOfYear
+		year: 2002
+		month: 1! !
 
 
 !classDefinition: #CartTest category: #TusLibros!
@@ -160,13 +156,13 @@ setUp
 		{self itemSellByTheStore -> 10}.
 	cashier _ Cashier withPriceList: aPriceList.! !
 
-!CashierTest methodsFor: 'tests' stamp: 'PO 6/7/2018 19:40:30'!
+!CashierTest methodsFor: 'tests' stamp: 'PB 6/10/2018 17:00:18'!
 test01CannotCheckoutEmptyCart
 	|cart|
 	cart := self createCart.
 	
 	self 
-		should: [ cashier checkout: cart. ]  
+		should: [ cashier checkout: cart with: self createValidCard. ]  
 		raise:  Error - MessageNotUnderstood 
 		withExceptionDo: [ :error |
 			self assert: Cashier cannotCheckoutEmptyCartError equals: error messageText.
@@ -246,9 +242,9 @@ initializeWith: aNumber andExpirationDate: aDate andOwner: aName
 	expirationDate := aDate.
 	owner := aName! !
 
-!Card methodsFor: 'initialization' stamp: 'PO 6/7/2018 21:00:05'!
+!Card methodsFor: 'initialization' stamp: 'PB 6/10/2018 16:57:13'!
 isExpired
-	^ expirationDate < Date today.! !
+	^ expirationDate < GregorianMonthOfYear current.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -273,16 +269,16 @@ Card subclass: #TestCard
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TestCard methodsFor: 'as yet unclassified' stamp: 'PO 6/7/2018 20:44:03'!
+!TestCard methodsFor: 'initialization' stamp: 'PO 6/7/2018 20:44:03'!
 initializeToday: anAhoraDate
 	today _ anAhoraDate.
 	^self! !
 
-!TestCard methodsFor: 'as yet unclassified' stamp: 'PO 6/7/2018 21:00:05'!
+!TestCard methodsFor: 'initialization' stamp: 'PO 6/7/2018 21:00:05'!
 isExpired
 	^ expirationDate < today.! !
 
-!TestCard methodsFor: 'as yet unclassified' stamp: 'PO 6/7/2018 20:43:35'!
+!TestCard methodsFor: 'initialization' stamp: 'PO 6/7/2018 20:43:35'!
 withNumber: aNumber andExpirationDate: anExpirationDate andOwner: aName andToday: anAhoraDate
 	^(self initializeWith: aNumber andExpirationDate: anExpirationDate  andOwner: aName) initializeToday: anAhoraDate 
 	! !
@@ -293,7 +289,7 @@ withNumber: aNumber andExpirationDate: anExpirationDate andOwner: aName andToday
 TestCard class
 	instanceVariableNames: ''!
 
-!TestCard class methodsFor: 'accessing' stamp: 'PO 6/7/2018 20:41:57'!
+!TestCard class methodsFor: 'instance creation' stamp: 'PO 6/7/2018 20:41:57'!
 withNumber: aNumber andExpirationDate: anExpirationDate andOwner: aName andToday: todayDate 
 	^self new withNumber: aNumber andExpirationDate: anExpirationDate  andOwner: aName  andToday: todayDate.! !
 
@@ -388,31 +384,31 @@ Object subclass: #Cashier
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'PO 6/7/2018 19:53:37'!
+!Cashier methodsFor: 'checkout' stamp: 'PB 6/10/2018 17:01:02'!
+checkout: aCart with: aCard
+	aCart isEmpty ifTrue: [ self error: self class cannotCheckoutEmptyCartError ].
+	aCard isExpired ifTrue: [ self error: Card expiredCardError ].
+	self
+		debit: (self calculateCost: aCart)
+		from: aCard.! !
+
+!Cashier methodsFor: 'checkout' stamp: 'PO 6/7/2018 19:56:34'!
+checkoutItem: anItem
+	price := price + (priceList at: anItem).! !
+
+
+!Cashier methodsFor: 'billing' stamp: 'PO 6/7/2018 19:53:37'!
 calculateCost: aCart 
 	aCart checkoutElementsWith: self.
 	^price! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'PO 6/7/2018 19:07:33'!
-checkout: aCart 
-	aCart isEmpty ifTrue: [self error: self class cannotCheckoutEmptyCartError ]! !
-
-!Cashier methodsFor: 'as yet unclassified' stamp: 'PO 6/7/2018 21:00:44'!
-checkout: aCart with: aCard
-	aCard isExpired ifTrue: [self error: Card expiredCardError ].
-	self debit: (self calculateCost: aCart) from: aCard
-	! !
-
-!Cashier methodsFor: 'as yet unclassified' stamp: 'PO 6/7/2018 19:56:34'!
-checkoutItem: anItem
-	price := price + (priceList at: anItem).! !
-
-!Cashier methodsFor: 'as yet unclassified' stamp: 'PO 6/7/2018 19:30:11'!
+!Cashier methodsFor: 'billing' stamp: 'PO 6/7/2018 19:30:11'!
 debit: anAmount from: aCard
 	 
 	! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'PO 6/7/2018 20:02:43'!
+
+!Cashier methodsFor: 'initialization' stamp: 'PO 6/7/2018 20:02:43'!
 withPriceList: aPriceList 
 	priceList := aPriceList.
 	price := 0! !
@@ -423,11 +419,11 @@ withPriceList: aPriceList
 Cashier class
 	instanceVariableNames: ''!
 
-!Cashier class methodsFor: 'as yet unclassified' stamp: 'PO 6/7/2018 19:06:21'!
+!Cashier class methodsFor: 'errors' stamp: 'PO 6/7/2018 19:06:21'!
 cannotCheckoutEmptyCartError
 	^'Cannot checkout an empty cart'! !
 
 
-!Cashier class methodsFor: 'accessing class hierarchy' stamp: 'PO 6/7/2018 20:01:06'!
+!Cashier class methodsFor: 'instance creation' stamp: 'PO 6/7/2018 20:01:06'!
 withPriceList: aPriceList
 	^self new withPriceList: aPriceList.! !
