@@ -136,7 +136,6 @@ test08CartRemembersTheNumberOfAddedItems
 	cart add: 2 of: self itemSellByTheStore.
 	self assert: (cart occurrencesOf: self itemSellByTheStore) = 2! !
 
-
 
 !classDefinition: #CashierTest category: #TusLibros!
 TusLibrosTest subclass: #CashierTest
@@ -145,19 +144,12 @@ TusLibrosTest subclass: #CashierTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-
-!CashierTest methodsFor: 'tests' stamp: 'PO 6/7/2018 19:59:54'!
+!CashierTest methodsFor: 'tests' stamp: 'PB 6/10/2018 16:36:43'!
 setUp
 	| aPriceList |
-	aPriceList := Dictionary newFromPairs: {self itemSellByTheStore. 10}.
-	cashier := Cashier withPriceList: aPriceList.
-	
-	
-	
-	
-	
-
-	! !
+	aPriceList _ Dictionary newFrom:
+		{self itemSellByTheStore -> 10}.
+	cashier _ Cashier withPriceList: aPriceList.! !
 
 !CashierTest methodsFor: 'tests' stamp: 'PO 6/7/2018 19:40:30'!
 test01CannotCheckoutEmptyCart
@@ -378,7 +370,6 @@ Cart class
 acceptingItemsOf: aCatalog
 
 	^self new initializeAcceptingItemsOf: aCatalog ! !
-
 
 
 !classDefinition: #Cashier category: #TusLibros!
