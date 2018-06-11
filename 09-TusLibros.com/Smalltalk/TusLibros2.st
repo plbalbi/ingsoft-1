@@ -184,28 +184,22 @@ test02CanCheckoutCartWithSingleItem
 
 	! !
 
-!CashierTest methodsFor: 'tests' stamp: 'PO 6/7/2018 19:40:43'!
+!CashierTest methodsFor: 'tests' stamp: 'PB 6/10/2018 21:35:02'!
 test03CashierCalculatesCostCorrectly
-	|cart cost |
-	cart := self createCart.
+	| cart cost |
+	cart _ self createCart.
 	cart add: self itemSellByTheStore.
-	cost := cashier calculateCost: cart.
-	self assert: cost equals: self costOfItemSellByTheStore.
-	
-	
-	
-	
+	cost _ CostCalculator priceOf: cart with: cashier.
+	self
+		assert: cost
+		equals: self costOfItemSellByTheStore.! !
 
-	! !
-
-!CashierTest methodsFor: 'tests' stamp: 'PB 6/10/2018 16:39:35'!
+!CashierTest methodsFor: 'tests' stamp: 'PB 6/10/2018 21:34:48'!
 test04CashierCalculatesCostOfManyItemsCart
 	| cart cost |
 	cart _ self createCart.
-	cart
-		add: 3
-		of: self itemSellByTheStore.
-	cost _ cashier calculateCost: cart.
+	cart add: 3 of: self itemSellByTheStore.
+	cost _ CostCalculator priceOf: cart with: cashier.
 	self
 		assert: self costOfItemSellByTheStore * 3
 		equals: cost.! !
@@ -361,9 +355,9 @@ add: aQuantity of: anItem
 	1 to: aQuantity do: [ :aNumber | items add: anItem ]! !
 
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'PO 6/7/2018 19:54:43'!
-checkoutElementsWith: aCashier 
-	items do: [ :item | aCashier checkoutItem: item ].! !
+!Cart methodsFor: 'as yet unclassified' stamp: 'PB 6/10/2018 21:37:09'!
+checkoutElementsWith: aPriceCalculator 
+	items do: [ :item | aPriceCalculator checkoutItem: item ].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -379,28 +373,23 @@ acceptingItemsOf: aCatalog
 
 !classDefinition: #Cashier category: #TusLibros!
 Object subclass: #Cashier
-	instanceVariableNames: 'price priceList'
+	instanceVariableNames: 'priceList'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cashier methodsFor: 'checkout' stamp: 'PB 6/10/2018 17:01:02'!
+!Cashier methodsFor: 'checkout' stamp: 'PB 6/10/2018 21:36:42'!
 checkout: aCart with: aCard
 	aCart isEmpty ifTrue: [ self error: self class cannotCheckoutEmptyCartError ].
 	aCard isExpired ifTrue: [ self error: Card expiredCardError ].
 	self
-		debit: (self calculateCost: aCart)
+		debit: (CostCalculator priceOf: aCart with: self)
 		from: aCard.! !
 
-!Cashier methodsFor: 'checkout' stamp: 'PO 6/7/2018 19:56:34'!
-checkoutItem: anItem
-	price := price + (priceList at: anItem).! !
+!Cashier methodsFor: 'checkout' stamp: 'PB 6/10/2018 21:32:48'!
+priceOf: anItem 
+	^priceList at: anItem.! !
 
-
-!Cashier methodsFor: 'billing' stamp: 'PO 6/7/2018 19:53:37'!
-calculateCost: aCart 
-	aCart checkoutElementsWith: self.
-	^price! !
 
 !Cashier methodsFor: 'billing' stamp: 'PO 6/7/2018 19:30:11'!
 debit: anAmount from: aCard
@@ -408,10 +397,9 @@ debit: anAmount from: aCard
 	! !
 
 
-!Cashier methodsFor: 'initialization' stamp: 'PO 6/7/2018 20:02:43'!
+!Cashier methodsFor: 'initialization' stamp: 'PB 6/10/2018 21:38:04'!
 withPriceList: aPriceList 
-	priceList := aPriceList.
-	price := 0! !
+	priceList := aPriceList.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -427,3 +415,49 @@ cannotCheckoutEmptyCartError
 !Cashier class methodsFor: 'instance creation' stamp: 'PO 6/7/2018 20:01:06'!
 withPriceList: aPriceList
 	^self new withPriceList: aPriceList.! !
+
+
+!classDefinition: #CostCalculator category: #TusLibros!
+Object subclass: #CostCalculator
+	instanceVariableNames: 'cart cashier price'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!CostCalculator methodsFor: 'initialization' stamp: 'PB 6/10/2018 21:31:30'!
+initialize
+	price _ 0.
+	^self! !
+
+!CostCalculator methodsFor: 'initialization' stamp: 'PB 6/10/2018 21:29:04'!
+initializeOf: aCart with: aCashier 
+	cart _ aCart.
+	cashier _ aCashier.
+	^self! !
+
+
+!CostCalculator methodsFor: 'calculation' stamp: 'PB 6/10/2018 21:31:46'!
+calculate
+	cart checkoutElementsWith: self.
+	^price! !
+
+!CostCalculator methodsFor: 'calculation' stamp: 'PB 6/10/2018 21:32:11'!
+checkoutItem: anItem
+	price _ price + (cashier priceOf: anItem).! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'CostCalculator class' category: #TusLibros!
+CostCalculator class
+	instanceVariableNames: ''!
+
+!CostCalculator class methodsFor: 'instance creation' stamp: 'PB 6/10/2018 21:28:37'!
+of: aCart with: aCashier 
+	^self new initializeOf: aCart with: aCashier! !
+
+
+!CostCalculator class methodsFor: 'price calculation' stamp: 'PB 6/10/2018 21:33:49'!
+priceOf: aCart with: aCashier
+	^ (self new
+		initializeOf: aCart
+		with: aCashier) calculate.! !
