@@ -181,107 +181,97 @@ setUp
 
 !classDefinition: #MerchantProcessorTest category: #TusLibros!
 TestCase subclass: #MerchantProcessorTest
-	instanceVariableNames: 'testObjectsFactory'
+	instanceVariableNames: 'testObjectsFactory cart salesBook'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!MerchantProcessorTest methodsFor: 'setup' stamp: 'PO 6/11/2018 18:55:48'!
+!MerchantProcessorTest methodsFor: 'setup' stamp: 'PB 6/13/2018 22:11:07'!
 setUp 
 
-	testObjectsFactory := StoreTestObjectsFactory new.! !
+	testObjectsFactory _ StoreTestObjectsFactory new.
+	cart _ testObjectsFactory createCart.
+	salesBook _ OrderedCollection new.! !
 
 
-!MerchantProcessorTest methodsFor: 'tests' stamp: 'PO 6/11/2018 20:26:39'!
-test01
-	|merchantProcessor cart salesBook|
-	merchantProcessor := MerchantProcessor doing: [].
-	cart := testObjectsFactory createCart.
+!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:13:02'!
+test01MerchantProcessorNotUsedWhenCreditCardExpired
+	| merchantProcessor |
+	merchantProcessor _ MerchantProcessor doing: [ ].
 	cart add: testObjectsFactory itemSellByTheStore.
-	salesBook := OrderedCollection new.
- 
-	self should: [Cashier 
-		toCheckout: cart 
-		charging: testObjectsFactory expiredCreditCard
+	self
+		should: [
+			Cashier
+				toCheckout: cart
+				charging: testObjectsFactory expiredCreditCard
+				on: testObjectsFactory today
+				registeringOn: salesBook
+				with: merchantProcessor ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :error |
+			self
+				assert: Cashier canNotChargeAnExpiredCreditCardErrorMessage
+				equals: error messageText.
+			self deny: merchantProcessor performedDebit ].! !
+
+!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:13:31'!
+test02MerchantProcessorFailsAndDoesntChargesWhenCardIsStolen
+	| merchantProcessor cashier card |
+	card _ testObjectsFactory notExpiredCreditCard.
+	merchantProcessor _ MerchantProcessor doing: [ self error: MerchantProcessor stolenCardErrorMessage ].
+	cart add: testObjectsFactory itemSellByTheStore.
+	cashier _ Cashier
+		toCheckout: cart
+		charging: card
 		on: testObjectsFactory today
 		registeringOn: salesBook
-		with: merchantProcessor]
-	raise: Error - MessageNotUnderstood
-	withExceptionDo: [:error | 
-		self assert: Cashier canNotChargeAnExpiredCreditCardErrorMessage equals: error messageText.
-		self deny: merchantProcessor performedDebit.	
-		]	! !
+		with: merchantProcessor.
+	self
+		should: [ cashier checkOut ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :error |
+			self
+				assert: MerchantProcessor stolenCardErrorMessage
+				equals: error messageText.
+			self deny: merchantProcessor performedDebit ].! !
 
-!MerchantProcessorTest methodsFor: 'tests' stamp: 'PO 6/11/2018 20:28:41'!
-test02
-	|merchantProcessor cart salesBook cashier card|
-	card := testObjectsFactory notExpiredCreditCard.
-	merchantProcessor := MerchantProcessor doing: [self error: MerchantProcessor stolenCardErrorMessage].
-	cart := testObjectsFactory createCart.
+!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:14:05'!
+test03MerchantProcessorFailsAndDoesntChargesWhenCardHasInsufficientFunds
+	| merchantProcessor cashier card |
+	card _ testObjectsFactory notExpiredCreditCard.
+	merchantProcessor _ MerchantProcessor doing: [ self error: MerchantProcessor insufficientFundsError ].
 	cart add: testObjectsFactory itemSellByTheStore.
-	salesBook := OrderedCollection new.
- 
-	cashier := Cashier toCheckout: cart 
-				charging: card
-				on: testObjectsFactory today
-				registeringOn: salesBook
-				with: merchantProcessor .
-							
-	self should: [cashier checkOut]
-	raise: Error - MessageNotUnderstood
-	withExceptionDo: [ :error | 
-		self assert: MerchantProcessor stolenCardErrorMessage equals: error messageText.
-		self deny: merchantProcessor performedDebit.
-		]
-	
-	
-	! !
+	cashier _ Cashier
+		toCheckout: cart
+		charging: card
+		on: testObjectsFactory today
+		registeringOn: salesBook
+		with: merchantProcessor.
+	self
+		should: [ cashier checkOut ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :error |
+			self
+				assert: MerchantProcessor insufficientFundsError
+				equals: error messageText.
+			self deny: merchantProcessor performedDebit ].! !
 
-!MerchantProcessorTest methodsFor: 'tests' stamp: 'PO 6/11/2018 20:28:49'!
-test03
-	|merchantProcessor cart salesBook cashier card|
-	card := testObjectsFactory notExpiredCreditCard.
-	merchantProcessor := MerchantProcessor doing: [self error: MerchantProcessor insufficientFundsError].
-	cart := testObjectsFactory createCart.
+!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:14:34'!
+test04MerchantProcessorChargesCorrectly
+	| merchantProcessor cashier card |
+	card _ testObjectsFactory notExpiredCreditCard.
+	merchantProcessor _ MerchantProcessor doing: [ ].
 	cart add: testObjectsFactory itemSellByTheStore.
-	salesBook := OrderedCollection new.
- 
-	cashier := Cashier toCheckout: cart 
-				charging: card
-				on: testObjectsFactory today
-				registeringOn: salesBook
-				with: merchantProcessor .
-				
-	self should: [cashier checkOut]
-	raise: Error - MessageNotUnderstood
-	withExceptionDo: [ :error | 
-		self assert: MerchantProcessor insufficientFundsError equals: error messageText.
-		self deny: merchantProcessor performedDebit.
-		]
-	
-	
-	! !
-
-!MerchantProcessorTest methodsFor: 'tests' stamp: 'PO 6/11/2018 20:29:00'!
-test04
-	|merchantProcessor cart salesBook cashier card|
-	card := testObjectsFactory notExpiredCreditCard.
-	merchantProcessor := MerchantProcessor doing: [].
-	cart := testObjectsFactory createCart.
-	cart add: testObjectsFactory itemSellByTheStore.
-	salesBook := OrderedCollection new.
- 
-	cashier := Cashier toCheckout: cart 
-				charging: card
-				on: testObjectsFactory today
-				registeringOn: salesBook
-				with: merchantProcessor .
-				
-	self assert: 10 equals: cashier checkOut .
-	self assert: merchantProcessor performedDebit.
-	
-	
-	! !
+	cashier _ Cashier
+		toCheckout: cart
+		charging: card
+		on: testObjectsFactory today
+		registeringOn: salesBook
+		with: merchantProcessor.
+	self
+		assert: 10
+		equals: cashier checkOut.
+	self assert: merchantProcessor performedDebit.! !
 
 
 !classDefinition: #Cart category: #TusLibros!
@@ -380,9 +370,10 @@ Object subclass: #Cashier
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cashier methodsFor: 'initialization' stamp: 'PO 6/11/2018 19:41:14'!
+!Cashier methodsFor: 'initialization' stamp: 'PB 6/13/2018 22:05:24'!
 initializeToCheckout: aCart charging: aCreditCard registeringOn: aSalesBook
 	
+	merchantProcessor _ NoMerchantProcessor new.
 	cart := aCart.
 	creditCard := aCreditCard.
 	salesBook := aSalesBook! !
@@ -528,6 +519,23 @@ stolenCardErrorMessage
 !MerchantProcessor class methodsFor: 'instance creation' stamp: 'PO 6/11/2018 20:23:50'!
 doing: aDebitAction 
 	^self new initializeWithAction: aDebitAction.! !
+
+
+!classDefinition: #NoMerchantProcessor category: #TusLibros!
+MerchantProcessor subclass: #NoMerchantProcessor
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+!NoMerchantProcessor commentStamp: '<historical>' prior: 0!
+Null Object merchant processor. Used for old tests compatibility, and to represent the absence of a merchant processor.!
+
+
+!NoMerchantProcessor methodsFor: 'initialization' stamp: 'PB 6/13/2018 22:04:48'!
+initialize
+	actionToPerform _ [].
+	debitPerformed _ true.
+ 	! !
 
 
 !classDefinition: #Sale category: #TusLibros!
