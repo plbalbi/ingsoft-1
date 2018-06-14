@@ -235,11 +235,11 @@ test02MerchantProcessorFailsAndDoesntChargesWhenCardIsStolen
 				equals: error messageText.
 			self deny: merchantProcessor performedDebit ].! !
 
-!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:14:05'!
+!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:18:06'!
 test03MerchantProcessorFailsAndDoesntChargesWhenCardHasInsufficientFunds
 	| merchantProcessor cashier card |
 	card _ testObjectsFactory notExpiredCreditCard.
-	merchantProcessor _ MerchantProcessor doing: [ self error: MerchantProcessor insufficientFundsError ].
+	merchantProcessor _ MerchantProcessor doing: [ self error: MerchantProcessor insufficientFundsErrorMessage ].
 	cart add: testObjectsFactory itemSellByTheStore.
 	cashier _ Cashier
 		toCheckout: cart
@@ -252,7 +252,7 @@ test03MerchantProcessorFailsAndDoesntChargesWhenCardHasInsufficientFunds
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :error |
 			self
-				assert: MerchantProcessor insufficientFundsError
+				assert: MerchantProcessor insufficientFundsErrorMessage
 				equals: error messageText.
 			self deny: merchantProcessor performedDebit ].! !
 
@@ -507,9 +507,9 @@ initializeWithAction: aDebitAction
 MerchantProcessor class
 	instanceVariableNames: 'stolenCards'!
 
-!MerchantProcessor class methodsFor: 'errors' stamp: 'PO 6/11/2018 20:05:02'!
-insufficientFundsError
-	^'The are no sufficient funds to process this purchase.'! !
+!MerchantProcessor class methodsFor: 'errors' stamp: 'PB 6/13/2018 22:18:06'!
+insufficientFundsErrorMessage
+	^ 'The are no sufficient funds to process this purchase.'.! !
 
 !MerchantProcessor class methodsFor: 'errors' stamp: 'PO 6/11/2018 19:54:34'!
 stolenCardErrorMessage
