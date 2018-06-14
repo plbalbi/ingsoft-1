@@ -194,10 +194,10 @@ setUp
 	salesBook _ OrderedCollection new.! !
 
 
-!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:13:02'!
+!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:30:52'!
 test01MerchantProcessorNotUsedWhenCreditCardExpired
 	| merchantProcessor |
-	merchantProcessor _ MerchantProcessor doing: [ ].
+	merchantProcessor _ MerchantProcessorMock doing: [ ].
 	cart add: testObjectsFactory itemSellByTheStore.
 	self
 		should: [
@@ -214,11 +214,11 @@ test01MerchantProcessorNotUsedWhenCreditCardExpired
 				equals: error messageText.
 			self deny: merchantProcessor performedDebit ].! !
 
-!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:13:31'!
+!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:30:52'!
 test02MerchantProcessorFailsAndDoesntChargesWhenCardIsStolen
 	| merchantProcessor cashier card |
 	card _ testObjectsFactory notExpiredCreditCard.
-	merchantProcessor _ MerchantProcessor doing: [ self error: MerchantProcessor stolenCardErrorMessage ].
+	merchantProcessor _ MerchantProcessorMock doing: [ self error: MerchantProcessorMock stolenCardErrorMessage ].
 	cart add: testObjectsFactory itemSellByTheStore.
 	cashier _ Cashier
 		toCheckout: cart
@@ -231,15 +231,15 @@ test02MerchantProcessorFailsAndDoesntChargesWhenCardIsStolen
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :error |
 			self
-				assert: MerchantProcessor stolenCardErrorMessage
+				assert: MerchantProcessorMock stolenCardErrorMessage
 				equals: error messageText.
 			self deny: merchantProcessor performedDebit ].! !
 
-!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:18:06'!
+!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:30:52'!
 test03MerchantProcessorFailsAndDoesntChargesWhenCardHasInsufficientFunds
 	| merchantProcessor cashier card |
 	card _ testObjectsFactory notExpiredCreditCard.
-	merchantProcessor _ MerchantProcessor doing: [ self error: MerchantProcessor insufficientFundsErrorMessage ].
+	merchantProcessor _ MerchantProcessorMock doing: [ self error: MerchantProcessorMock insufficientFundsErrorMessage ].
 	cart add: testObjectsFactory itemSellByTheStore.
 	cashier _ Cashier
 		toCheckout: cart
@@ -252,15 +252,15 @@ test03MerchantProcessorFailsAndDoesntChargesWhenCardHasInsufficientFunds
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :error |
 			self
-				assert: MerchantProcessor insufficientFundsErrorMessage
+				assert: MerchantProcessorMock insufficientFundsErrorMessage
 				equals: error messageText.
 			self deny: merchantProcessor performedDebit ].! !
 
-!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:14:34'!
+!MerchantProcessorTest methodsFor: 'tests' stamp: 'PB 6/13/2018 22:30:52'!
 test04MerchantProcessorChargesCorrectly
 	| merchantProcessor cashier card |
 	card _ testObjectsFactory notExpiredCreditCard.
-	merchantProcessor _ MerchantProcessor doing: [ ].
+	merchantProcessor _ MerchantProcessorMock doing: [ ].
 	cart add: testObjectsFactory itemSellByTheStore.
 	cashier _ Cashier
 		toCheckout: cart
@@ -477,46 +477,66 @@ expiringOn: aMonth
 
 !classDefinition: #MerchantProcessor category: #TusLibros!
 Object subclass: #MerchantProcessor
-	instanceVariableNames: 'actionToPerform debitPerformed'
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!MerchantProcessor methodsFor: 'billing' stamp: 'PO 6/11/2018 20:21:41'!
+!MerchantProcessor methodsFor: 'billing' stamp: 'PB 6/13/2018 22:33:05'!
+debit: anAmount from: aCreditCard 
+	self subclassResponsibility 
+	! !
+
+!MerchantProcessor methodsFor: 'billing' stamp: 'PB 6/13/2018 22:33:23'!
+performedDebit
+	self subclassResponsibility ! !
+
+
+!classDefinition: #MerchantProcessorMock category: #TusLibros!
+MerchantProcessor subclass: #MerchantProcessorMock
+	instanceVariableNames: 'actionToPerform debitPerformed'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+!MerchantProcessorMock commentStamp: '<historical>' prior: 0!
+Test oriented merchant processor. Simulates the behaiviour wanted by a closure passed when instanced.!
+
+
+!MerchantProcessorMock methodsFor: 'billing' stamp: 'PO 6/11/2018 20:21:41'!
 debit: anAmount from: aCreditCard 
 	actionToPerform value.
 	debitPerformed _ true.
 	! !
 
-!MerchantProcessor methodsFor: 'billing' stamp: 'PO 6/11/2018 20:26:50'!
+!MerchantProcessorMock methodsFor: 'billing' stamp: 'PO 6/11/2018 20:26:50'!
 performedDebit
 	^debitPerformed ! !
 
 
-!MerchantProcessor methodsFor: 'initialization' stamp: 'PO 6/11/2018 20:21:53'!
+!MerchantProcessorMock methodsFor: 'initialization' stamp: 'PO 6/11/2018 20:21:53'!
 initialize
 	debitPerformed _ false.! !
 
-!MerchantProcessor methodsFor: 'initialization' stamp: 'PO 6/11/2018 20:24:11'!
+!MerchantProcessorMock methodsFor: 'initialization' stamp: 'PO 6/11/2018 20:24:11'!
 initializeWithAction: aDebitAction 
 	actionToPerform _ aDebitAction.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'MerchantProcessor class' category: #TusLibros!
-MerchantProcessor class
+!classDefinition: 'MerchantProcessorMock class' category: #TusLibros!
+MerchantProcessorMock class
 	instanceVariableNames: 'stolenCards'!
 
-!MerchantProcessor class methodsFor: 'errors' stamp: 'PB 6/13/2018 22:18:06'!
+!MerchantProcessorMock class methodsFor: 'errors' stamp: 'PB 6/13/2018 22:18:06'!
 insufficientFundsErrorMessage
 	^ 'The are no sufficient funds to process this purchase.'.! !
 
-!MerchantProcessor class methodsFor: 'errors' stamp: 'PO 6/11/2018 19:54:34'!
+!MerchantProcessorMock class methodsFor: 'errors' stamp: 'PO 6/11/2018 19:54:34'!
 stolenCardErrorMessage
 	^'Cannot debit from stolen credit card.'! !
 
 
-!MerchantProcessor class methodsFor: 'instance creation' stamp: 'PO 6/11/2018 20:23:50'!
+!MerchantProcessorMock class methodsFor: 'instance creation' stamp: 'PO 6/11/2018 20:23:50'!
 doing: aDebitAction 
 	^self new initializeWithAction: aDebitAction.! !
 
@@ -531,11 +551,8 @@ MerchantProcessor subclass: #NoMerchantProcessor
 Null Object merchant processor. Used for old tests compatibility, and to represent the absence of a merchant processor.!
 
 
-!NoMerchantProcessor methodsFor: 'initialization' stamp: 'PB 6/13/2018 22:04:48'!
-initialize
-	actionToPerform _ [].
-	debitPerformed _ true.
- 	! !
+!NoMerchantProcessor methodsFor: 'billing' stamp: 'PB 6/13/2018 22:29:53'!
+debit: anAmount from: aCreditCard! !
 
 
 !classDefinition: #Sale category: #TusLibros!
