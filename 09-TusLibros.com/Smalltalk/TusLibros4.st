@@ -276,7 +276,7 @@ test04MerchantProcessorChargesCorrectly
 
 !classDefinition: #RestTest category: #TusLibros!
 TestCase subclass: #RestTest
-	instanceVariableNames: 'testObjectsFactory carts catalog'
+	instanceVariableNames: 'testObjectsFactory carts catalog merchantProcessor'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -327,6 +327,10 @@ isValidUser: anUsername
 !RestTest methodsFor: 'enviroment' stamp: 'PB 6/17/2018 23:05:01'!
 isValidWith: anUsername and: aPassword
 	^anUsername = self validUser & aPassword = self validPassword ! !
+
+!RestTest methodsFor: 'enviroment' stamp: 'PB 6/18/2018 01:57:16'!
+merchantProcessor
+	^merchantProcessor! !
 
 !RestTest methodsFor: 'enviroment' stamp: 'PO 6/14/2018 20:55:42'!
 newCartId
@@ -444,6 +448,39 @@ test08CantListNonExistingCart
 		withExceptionDo: [ :error |
 			self assert: TusLibrosSystem invalidCartIdError equals: error messageText.
 			]! !
+
+!RestTest methodsFor: 'tests' stamp: 'PB 6/18/2018 02:05:02'!
+test09CanCheckoutCartWithValidCard
+	| algo validExpirationMonth |
+	algo _ TusLibrosSystem newWithEnvironment: self.
+	merchantProcessor _ MerchantProcessorMock new.
+	"todo: Según la especificación de la API, debe tomar como fecha algo asi como mmaaaa, esto valdrá también para este mensaje, o será lidiado con del otro lado de la interfaz?"
+	validExpirationMonth _ Month month: testObjectsFactory today monthIndex year: testObjectsFactory today yearNumber + 1.
+	
+	carts add: 123->testObjectsFactory createCartWithItems.
+	algo checkoutCart: 123 on: testObjectsFactory today withCreditCard: 1234 expiring: validExpirationMonth  belongingTo: 'alf'. 
+	self assert: merchantProcessor performedDebit.
+	
+	
+	! !
+
+!RestTest methodsFor: 'tests' stamp: 'PB 6/18/2018 02:07:37'!
+test10CantCheckoutNonExistingCart
+	| algo validExpirationMonth |
+	algo _ TusLibrosSystem newWithEnvironment: self.
+	merchantProcessor _ MerchantProcessorMock new.
+	"todo: Según la especificación de la API, debe tomar como fecha algo asi como mmaaaa, esto valdrá también para este mensaje, o será lidiado con del otro lado de la interfaz?"
+	validExpirationMonth _ Month month: testObjectsFactory today monthIndex year: testObjectsFactory today yearNumber + 1.
+	
+	self 
+		should: [ algo checkoutCart: 123 on: testObjectsFactory today withCreditCard: 1234 expiring: validExpirationMonth  belongingTo: 'alf'.  ] 
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:error | self assert: TusLibrosSystem invalidCartIdError equals: error messageText ].
+	
+	self deny: merchantProcessor performedDebit.
+	
+	
+	! !
 
 
 !classDefinition: #Cart category: #TusLibros!
@@ -770,6 +807,10 @@ Object subclass: #StoreTestObjectsFactory
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
+!StoreTestObjectsFactory methodsFor: 'cart' stamp: 'PB 6/18/2018 01:44:21'!
+anotherItemSellByTheStorePrice
+	^14! !
+
 !StoreTestObjectsFactory methodsFor: 'cart' stamp: 'HernanWilkinson 6/17/2013 18:08'!
 createCart
 	
@@ -784,12 +825,12 @@ createCartWithItems
 	cartWithItems add: 5 of: self anotherItemSellByTheStore.
 	^cartWithItems ! !
 
-!StoreTestObjectsFactory methodsFor: 'cart' stamp: 'PB 6/18/2018 00:55:04'!
+!StoreTestObjectsFactory methodsFor: 'cart' stamp: 'PB 6/18/2018 01:44:12'!
 defaultCatalog
 	
 	^ Dictionary new
 		at: self itemSellByTheStore put: self itemSellByTheStorePrice;
-		at: self anotherItemSellByTheStore put: self anotherItemSellByTheStore;
+		at: self anotherItemSellByTheStore put: self anotherItemSellByTheStorePrice;
 		yourself ! !
 
 
@@ -849,6 +890,32 @@ addToCart: aCartId an: anISBN times: aQuantity
 
 	(self getCart: aCartId) add: aQuantity of: anISBN.
 		! !
+
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/18/2018 02:01:41'!
+checkoutCart: aCartId on: currentDate withCreditCard: aNumber expiring: anExpirationDate belongingTo: anOwner
+	| cashier |
+	
+	cashier _ Cashier 
+		toCheckout: (self getCart: aCartId) 
+		charging: (CreditCard expiringOn: anExpirationDate)
+		on: currentDate
+		registeringOn:  OrderedCollection new
+		with: environment merchantProcessor.
+	cashier checkOut.
+	^1! !
+
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/18/2018 01:57:08'!
+checkoutCart: aCartId withCreditCard: aNumber expiring: anExpirationDate belongingTo: anOwner
+	| cashier |
+	
+	cashier _ Cashier 
+		toCheckout: (self getCart: aCartId) 
+		charging: (CreditCard expiringOn: anExpirationDate)
+		on: GregorianMonthOfYear current
+		registeringOn:  OrderedCollection new
+		with: environment merchantProcessor.
+	cashier checkOut.
+	^1! !
 
 !TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/17/2018 23:08:43'!
 createCartFor: anUsername with: aPassword at: aTime
