@@ -276,16 +276,18 @@ test04MerchantProcessorChargesCorrectly
 
 !classDefinition: #RestTest category: #TusLibros!
 TestCase subclass: #RestTest
-	instanceVariableNames: 'testObjectsFactory carts catalog merchantProcessor'
+	instanceVariableNames: 'testObjectsFactory carts catalog merchantProcessor userPurchases cartOwners'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!RestTest methodsFor: 'preparation' stamp: 'PB 6/18/2018 00:21:29'!
+!RestTest methodsFor: 'preparation' stamp: 'PO 6/18/2018 13:17:07'!
 setUp
 	testObjectsFactory _ StoreTestObjectsFactory new.
 	carts _ Dictionary new.
 	catalog _ testObjectsFactory defaultCatalog.
+	userPurchases _ Dictionary new.
+	cartOwners _ Dictionary new.
 ! !
 
 
@@ -306,6 +308,10 @@ validUser
 	^ 'PSANCHEZ'.! !
 
 
+!RestTest methodsFor: 'enviroment' stamp: 'PO 6/18/2018 13:26:22'!
+addCartToPurchasesOf: aString 
+	self shouldBeImplemented.! !
+
 !RestTest methodsFor: 'enviroment' stamp: 'PB 6/18/2018 00:20:39'!
 addNewCartWith: aCartId
 	carts at: aCartId put: (Cart acceptingItemsOf: catalog).
@@ -315,6 +321,10 @@ addNewCartWith: aCartId
 getCart: aCartId
 	^carts at: aCartId
 	! !
+
+!RestTest methodsFor: 'enviroment' stamp: 'PO 6/18/2018 13:13:52'!
+getCartOwner: aCartId 
+	^cartOwners at: aCartId! !
 
 !RestTest methodsFor: 'enviroment' stamp: 'PO 6/14/2018 21:32:27'!
 hasCartWith: aCartId 
@@ -335,6 +345,10 @@ merchantProcessor
 !RestTest methodsFor: 'enviroment' stamp: 'PO 6/14/2018 20:55:42'!
 newCartId
 	^42! !
+
+!RestTest methodsFor: 'enviroment' stamp: 'PO 6/18/2018 13:29:33'!
+nextTransactionId
+	^1! !
 
 
 !RestTest methodsFor: 'tests' stamp: 'PO 6/14/2018 20:56:27'!
@@ -449,7 +463,7 @@ test08CantListNonExistingCart
 			self assert: TusLibrosSystem invalidCartIdError equals: error messageText.
 			]! !
 
-!RestTest methodsFor: 'tests' stamp: 'PO 6/18/2018 09:28:38'!
+!RestTest methodsFor: 'tests' stamp: 'PO 6/18/2018 13:25:34'!
 test09CanCheckoutCartWithValidCard
 	| algo validExpirationMonth expirationDateString|
 	algo _ TusLibrosSystem newWithEnvironment: self.
@@ -457,6 +471,7 @@ test09CanCheckoutCartWithValidCard
 	validExpirationMonth _ Month month: testObjectsFactory today monthIndex year: testObjectsFactory today yearNumber + 1.
 	expirationDateString _ RestTest expirationMonthToString: validExpirationMonth.
 	carts add: 123->testObjectsFactory createCartWithItems.
+	cartOwners at: 123 put: 'alf'.
 	algo checkoutCart: 123 on: testObjectsFactory today withCreditCard: 1234 expiring: expirationDateString  belongingTo: 'alf'. 
 	self assert: merchantProcessor performedDebit.
 	
@@ -479,6 +494,41 @@ test10CantCheckoutNonExistingCart
 	
 	
 	! !
+
+!RestTest methodsFor: 'tests' stamp: 'PO 6/18/2018 11:52:09'!
+test11ListPurchasesOfValidUsernameAndPassword
+	| algo validExpirationMonth expirationDateString|
+	algo _ TusLibrosSystem newWithEnvironment: self.
+	merchantProcessor _ NoMerchantProcessor new.
+
+	validExpirationMonth _ Month month: testObjectsFactory today monthIndex year: testObjectsFactory today yearNumber + 1.
+	expirationDateString _ RestTest expirationMonthToString: validExpirationMonth.
+	carts add: 123->testObjectsFactory createCartWithItems.
+	carts add: 124->testObjectsFactory createCartWithItems.
+
+	algo checkoutCart: 123 on: testObjectsFactory today withCreditCard: 1234 expiring: expirationDateString  belongingTo: 'alf'. 
+	algo checkoutCart: 124 on: testObjectsFactory today withCreditCard: 1234 expiring: expirationDateString  belongingTo: 'alf'. 
+
+	self assert: (Array with: 23148 with: 1 with: 128390 with: 1 with: 24) equals: (algo listPurchasesFor: self validUser with: self validPassword)! !
+
+
+!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 13:29:13'!
+add: aCartId ToPurchasesOf: anUsername 
+	userPurchases at: anUsername put: aCartId! !
+
+!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 13:28:26'!
+addCartToUserPurchases: aCartId
+	| userName |
+	userName := self getCartOwner: aCartId.
+	self add: aCartId ToPurchasesOf: userName! !
+
+!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 13:21:37'!
+attach: anUsername toCart: aCartId 
+	cartOwners at: aCartId put: anUsername! !
+
+!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 12:56:40'!
+getPurchasesOf: aUsername 
+	^userPurchases at: aUsername! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -903,7 +953,7 @@ addToCart: aCartId an: anISBN times: aQuantity
 	(self getCart: aCartId) add: aQuantity of: anISBN.
 		! !
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 09:23:52'!
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 13:04:26'!
 checkoutCart: aCartId on: currentDate withCreditCard: aNumber expiring: anExpirationDateString belongingTo: anOwner
 	| cashier |
 	
@@ -914,7 +964,10 @@ checkoutCart: aCartId on: currentDate withCreditCard: aNumber expiring: anExpira
 		registeringOn:  OrderedCollection new
 		with: environment merchantProcessor.
 	cashier checkOut.
-	^1! !
+	
+	environment addCartToUserPurchases: aCartId.
+	
+	^environment nextTransactionId! !
 
 !TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/18/2018 01:57:08'!
 checkoutCart: aCartId withCreditCard: aNumber expiring: anExpirationDate belongingTo: anOwner
@@ -929,7 +982,7 @@ checkoutCart: aCartId withCreditCard: aNumber expiring: anExpirationDate belongi
 	cashier checkOut.
 	^1! !
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/17/2018 23:08:43'!
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 13:19:36'!
 createCartFor: anUsername with: aPassword at: aTime
 	| newCartId |
 	(environment isValidWith: anUsername and: aPassword) 
@@ -938,6 +991,7 @@ createCartFor: anUsername with: aPassword at: aTime
 		].
 	newCartId _ environment newCartId.
 	environment addNewCartWith: newCartId.
+	environment attach: anUsername toCart: newCartId.
 	^ newCartId 
 
 	! !
@@ -952,6 +1006,22 @@ listCart: aCartId
 	itemsList _ (self getCart: aCartId) listItems.
 	(itemsList isEmpty) ifTrue: [self error: self class cannotListEmptyCartWarning].
 	^itemsList
+	! !
+
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 12:51:14'!
+listPurchasesFor: anUsername with: aPassword 
+	|purchases total|
+	(environment isValidWith: anUsername and: aPassword) 
+	ifTrue: [
+		 
+		
+		purchases := environment getPurchasesOf: anUsername.
+		total := environment getPurchasedAmountOf: anUsername.
+		^Array with: purchases with: total
+	]
+	ifFalse: [
+		^self error: self class cannotListPurchasesWithInvalidUsernameOrPassword
+	]
 	! !
 
 !TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:24:39'!
