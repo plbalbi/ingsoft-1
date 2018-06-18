@@ -281,47 +281,58 @@ TestCase subclass: #RestTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 21:31:26'!
-addNewCartWith: aCartId
-	carts at: aCartId put: Cart new.
-	! !
-
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:51:47'!
-carts
-	^carts! !
-
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 21:32:58'!
-getCart: aCartId
-	^carts at: aCartId
-	! !
-
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 21:32:27'!
-hasCartWith: aCartId 
-	^carts includesKey: aCartId ! !
-
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 21:00:37'!
-invalidPassword
-	^'4321'! !
-
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:49:27'!
-invalidUser
-	^'InvalidUsername'! !
-
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 21:06:04'!
-isValidUser: anUsername
-	^anUsername  = self validUser ! !
-
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:55:42'!
-newCartId
-	^42! !
-
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 21:30:09'!
+!RestTest methodsFor: 'preparation' stamp: 'PO 6/14/2018 21:30:09'!
 setUp
 	testObjectsFactory _ StoreTestObjectsFactory new.
 	carts _ Dictionary new.
 ! !
 
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:56:27'!
+
+!RestTest methodsFor: 'test objects' stamp: 'PO 6/14/2018 21:00:37'!
+invalidPassword
+	^'4321'! !
+
+!RestTest methodsFor: 'test objects' stamp: 'PO 6/14/2018 20:49:27'!
+invalidUser
+	^'InvalidUsername'! !
+
+!RestTest methodsFor: 'test objects' stamp: 'PO 6/14/2018 20:56:18'!
+validPassword
+	^ '1234'.! !
+
+!RestTest methodsFor: 'test objects' stamp: 'PO 6/14/2018 20:56:27'!
+validUser
+	^ 'PSANCHEZ'.! !
+
+
+!RestTest methodsFor: 'enviroment' stamp: 'PO 6/14/2018 21:31:26'!
+addNewCartWith: aCartId
+	carts at: aCartId put: Cart new.
+	! !
+
+!RestTest methodsFor: 'enviroment' stamp: 'PB 6/17/2018 22:53:33'!
+getCart: aCartId
+	^carts at: aCartId
+	! !
+
+!RestTest methodsFor: 'enviroment' stamp: 'PO 6/14/2018 21:32:27'!
+hasCartWith: aCartId 
+	^carts includesKey: aCartId ! !
+
+!RestTest methodsFor: 'enviroment' stamp: 'PO 6/14/2018 21:06:04'!
+isValidUser: anUsername
+	^anUsername  = self validUser ! !
+
+!RestTest methodsFor: 'enviroment' stamp: 'PB 6/17/2018 23:05:01'!
+isValidWith: anUsername and: aPassword
+	^anUsername = self validUser & aPassword = self validPassword ! !
+
+!RestTest methodsFor: 'enviroment' stamp: 'PO 6/14/2018 20:55:42'!
+newCartId
+	^42! !
+
+
+!RestTest methodsFor: 'tests' stamp: 'PO 6/14/2018 20:56:27'!
 test01CreatesCartWithValidUserAndPassword
 	| algo createdCartId timeOfCartCreation |
 	algo _ TusLibrosSystem newWithEnvironment: self.
@@ -332,7 +343,7 @@ test01CreatesCartWithValidUserAndPassword
 		at: timeOfCartCreation.
 	self assert: (self hasCartWith: createdCartId).! !
 
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:56:18'!
+!RestTest methodsFor: 'tests' stamp: 'PB 6/17/2018 23:06:56'!
 test02CantCreateCartWIthInvalidUser
 	| algo createdCartId timeOfCartCreation |
 	algo _ TusLibrosSystem newWithEnvironment: self.
@@ -346,11 +357,11 @@ test02CantCreateCartWIthInvalidUser
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :error |
 			self
-				assert: TusLibrosSystem cannotCreateCartWithInvalidUserMessage
+				assert: TusLibrosSystem cannotCreateCartWithInvalidUsernameOrPassword 
 				equals: error messageText.
 			self deny: (self hasCartWith: createdCartId) ].! !
 
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 21:00:17'!
+!RestTest methodsFor: 'tests' stamp: 'PB 6/17/2018 23:05:57'!
 test03CantCreateCartWIthValidUserAndInvalidPassword
 	| algo createdCartId timeOfCartCreation |
 	algo _ TusLibrosSystem newWithEnvironment: self.
@@ -364,11 +375,11 @@ test03CantCreateCartWIthValidUserAndInvalidPassword
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :error |
 			self
-				assert: TusLibrosSystem cannotCreateCartWithInvalidPasswordMessage
+				assert: TusLibrosSystem cannotCreateCartWithInvalidUsernameOrPassword
 				equals: error messageText.
 			self deny: (self hasCartWith: createdCartId) ].! !
 
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 21:40:57'!
+!RestTest methodsFor: 'tests' stamp: 'PO 6/14/2018 21:40:57'!
 test04addToCartAddsACart
 	| algo cart |
 	algo _ TusLibrosSystem newWithEnvironment: self.
@@ -385,7 +396,7 @@ test04addToCartAddsACart
 				with: self validPassword
 				at: timeOfCartCreation "! !
 
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 21:55:26'!
+!RestTest methodsFor: 'tests' stamp: 'PO 6/14/2018 21:55:26'!
 test05cannotAddToCartIfCartDoesNotExist
 	| algo |
 	algo _ TusLibrosSystem newWithEnvironment: self.
@@ -403,14 +414,6 @@ test05cannotAddToCartIfCartDoesNotExist
 				createCartFor: self validUser
 				with: self validPassword
 				at: timeOfCartCreation "! !
-
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:56:18'!
-validPassword
-	^ '1234'.! !
-
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:56:27'!
-validUser
-	^ 'PSANCHEZ'.! !
 
 
 !classDefinition: #Cart category: #TusLibros!
@@ -791,29 +794,25 @@ Object subclass: #TusLibrosSystem
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 21:26:30'!
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/17/2018 22:57:48'!
 addToCart: aCartId an: anISBN times: aQuantity
 	|cart|
-	cart := environment getCart: aCartId.
+	[ cart := environment getCart: aCartId. ] 
+		ifError: [ self error: self class cannotAddItemToCartIfDoesNotExist ].
 	cart add: aQuantity of: anISBN.
 		! !
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 21:31:01'!
-createCartFor: anUsername with: aPassword at: aTime 
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/17/2018 23:08:43'!
+createCartFor: anUsername with: aPassword at: aTime
 	| newCartId |
-	(environment isValidUser: anUsername) 
-		ifTrue: [ 
-			aPassword = environment validPassword 
-			ifTrue: [	
-				newCartId _ environment newCartId.
-				environment addNewCartWith: newCartId.
-				^newCartId ]
-			ifFalse: [self error: self class cannotCreateCartWithInvalidPasswordMessage]
-			
-		
-		]
-		
-		ifFalse: [self error: self class cannotCreateCartWithInvalidUserMessage ].
+	(environment isValidWith: anUsername and: aPassword) 
+	ifFalse: [ 
+		self error: self class cannotCreateCartWithInvalidUsernameOrPassword 
+		].
+	newCartId _ environment newCartId.
+	environment addNewCartWith: newCartId.
+	^ newCartId 
+
 	! !
 
 !TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:24:39'!
@@ -830,13 +829,13 @@ TusLibrosSystem class
 cannotAddItemToCartIfDoesNotExist
 	^'Cannot add item to cart that does not exist'! !
 
-!TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 21:03:59'!
-cannotCreateCartWithInvalidPasswordMessage
-	^'Cannot create cart with invalid password'! !
-
 !TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:43:35'!
 cannotCreateCartWithInvalidUserMessage
 	^'Cannot create cart with invalid username'! !
+
+!TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'PB 6/17/2018 23:06:43'!
+cannotCreateCartWithInvalidUsernameOrPassword
+	^ 'Cannot create cart with invalid username or password'.! !
 
 !TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:24:58'!
 newWithEnvironment: anEnviroment
