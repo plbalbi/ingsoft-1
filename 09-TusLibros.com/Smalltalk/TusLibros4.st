@@ -276,18 +276,19 @@ test04MerchantProcessorChargesCorrectly
 
 !classDefinition: #RestTest category: #TusLibros!
 TestCase subclass: #RestTest
-	instanceVariableNames: 'testObjectsFactory carts catalog merchantProcessor userPurchases cartOwners'
+	instanceVariableNames: 'testObjectsFactory carts catalog merchantProcessor userPurchases cartOwners userPurchasedAmount'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!RestTest methodsFor: 'preparation' stamp: 'PO 6/18/2018 13:17:07'!
+!RestTest methodsFor: 'preparation' stamp: 'po 6/18/2018 13:46:42'!
 setUp
 	testObjectsFactory _ StoreTestObjectsFactory new.
 	carts _ Dictionary new.
 	catalog _ testObjectsFactory defaultCatalog.
 	userPurchases _ Dictionary new.
 	cartOwners _ Dictionary new.
+	userPurchasedAmount  _ Dictionary new.
 ! !
 
 
@@ -325,6 +326,15 @@ getCart: aCartId
 !RestTest methodsFor: 'enviroment' stamp: 'PO 6/18/2018 13:13:52'!
 getCartOwner: aCartId 
 	^cartOwners at: aCartId! !
+
+!RestTest methodsFor: 'enviroment' stamp: 'po 6/18/2018 13:56:25'!
+getSalesBookForUser: anUsername 
+	| newSalesBook |
+	^userPurchasedAmount at: anUsername ifAbsent: [
+		newSalesBook _ OrderedCollection new.
+		userPurchasedAmount at: anUsername put: newSalesBook.
+		^newSalesBook
+		]! !
 
 !RestTest methodsFor: 'enviroment' stamp: 'PO 6/14/2018 21:32:27'!
 hasCartWith: aCartId 
@@ -495,7 +505,7 @@ test10CantCheckoutNonExistingCart
 	
 	! !
 
-!RestTest methodsFor: 'tests' stamp: 'PO 6/18/2018 11:52:09'!
+!RestTest methodsFor: 'tests' stamp: 'po 6/18/2018 13:41:14'!
 test11ListPurchasesOfValidUsernameAndPassword
 	| algo validExpirationMonth expirationDateString|
 	algo _ TusLibrosSystem newWithEnvironment: self.
@@ -504,9 +514,11 @@ test11ListPurchasesOfValidUsernameAndPassword
 	validExpirationMonth _ Month month: testObjectsFactory today monthIndex year: testObjectsFactory today yearNumber + 1.
 	expirationDateString _ RestTest expirationMonthToString: validExpirationMonth.
 	carts add: 123->testObjectsFactory createCartWithItems.
-	carts add: 124->testObjectsFactory createCartWithItems.
-
+	cartOwners at: 123 put: 'alf'.
 	algo checkoutCart: 123 on: testObjectsFactory today withCreditCard: 1234 expiring: expirationDateString  belongingTo: 'alf'. 
+
+	carts add: 124->testObjectsFactory createCartWithItems.
+	cartOwners at: 124 put: 'alf'.
 	algo checkoutCart: 124 on: testObjectsFactory today withCreditCard: 1234 expiring: expirationDateString  belongingTo: 'alf'. 
 
 	self assert: (Array with: 23148 with: 1 with: 128390 with: 1 with: 24) equals: (algo listPurchasesFor: self validUser with: self validPassword)! !
@@ -526,9 +538,13 @@ addCartToUserPurchases: aCartId
 attach: anUsername toCart: aCartId 
 	cartOwners at: aCartId put: anUsername! !
 
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 12:56:40'!
+!RestTest methodsFor: 'as yet unclassified' stamp: 'po 6/18/2018 13:46:10'!
+getPurchasedAmountOf: anUsername 
+	^userPurchasedAmount at: anUsername! !
+
+!RestTest methodsFor: 'as yet unclassified' stamp: 'po 6/18/2018 13:44:54'!
 getPurchasesOf: aUsername 
-	^userPurchases at: aUsername! !
+	^[userPurchases at: aUsername] ifError: [^Dictionary new.]! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -953,34 +969,23 @@ addToCart: aCartId an: anISBN times: aQuantity
 	(self getCart: aCartId) add: aQuantity of: anISBN.
 		! !
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 13:04:26'!
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'po 6/18/2018 13:49:29'!
 checkoutCart: aCartId on: currentDate withCreditCard: aNumber expiring: anExpirationDateString belongingTo: anOwner
-	| cashier |
+	| cashier userSalesBook |
+	
+	userSalesBook _ environment getSalesBookForUser: (environment getCartOwner: aCartId ).
 	
 	cashier _ Cashier 
 		toCheckout: (self getCart: aCartId) 
 		charging: (CreditCard expiringOn: (TusLibrosSystem expirationDateStringToDate: anExpirationDateString))
 		on: currentDate
-		registeringOn:  OrderedCollection new
+		registeringOn: userSalesBook  
 		with: environment merchantProcessor.
 	cashier checkOut.
 	
 	environment addCartToUserPurchases: aCartId.
 	
 	^environment nextTransactionId! !
-
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/18/2018 01:57:08'!
-checkoutCart: aCartId withCreditCard: aNumber expiring: anExpirationDate belongingTo: anOwner
-	| cashier |
-	
-	cashier _ Cashier 
-		toCheckout: (self getCart: aCartId) 
-		charging: (CreditCard expiringOn: anExpirationDate)
-		on: GregorianMonthOfYear current
-		registeringOn:  OrderedCollection new
-		with: environment merchantProcessor.
-	cashier checkOut.
-	^1! !
 
 !TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 13:19:36'!
 createCartFor: anUsername with: aPassword at: aTime
