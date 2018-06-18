@@ -449,37 +449,49 @@ test08CantListNonExistingCart
 			self assert: TusLibrosSystem invalidCartIdError equals: error messageText.
 			]! !
 
-!RestTest methodsFor: 'tests' stamp: 'PB 6/18/2018 02:05:02'!
+!RestTest methodsFor: 'tests' stamp: 'PO 6/18/2018 09:28:38'!
 test09CanCheckoutCartWithValidCard
-	| algo validExpirationMonth |
+	| algo validExpirationMonth expirationDateString|
 	algo _ TusLibrosSystem newWithEnvironment: self.
 	merchantProcessor _ MerchantProcessorMock new.
-	"todo: Según la especificación de la API, debe tomar como fecha algo asi como mmaaaa, esto valdrá también para este mensaje, o será lidiado con del otro lado de la interfaz?"
 	validExpirationMonth _ Month month: testObjectsFactory today monthIndex year: testObjectsFactory today yearNumber + 1.
-	
+	expirationDateString _ RestTest expirationMonthToString: validExpirationMonth.
 	carts add: 123->testObjectsFactory createCartWithItems.
-	algo checkoutCart: 123 on: testObjectsFactory today withCreditCard: 1234 expiring: validExpirationMonth  belongingTo: 'alf'. 
+	algo checkoutCart: 123 on: testObjectsFactory today withCreditCard: 1234 expiring: expirationDateString  belongingTo: 'alf'. 
 	self assert: merchantProcessor performedDebit.
 	
 	
 	! !
 
-!RestTest methodsFor: 'tests' stamp: 'PB 6/18/2018 02:07:37'!
+!RestTest methodsFor: 'tests' stamp: 'PO 6/18/2018 09:29:03'!
 test10CantCheckoutNonExistingCart
-	| algo validExpirationMonth |
+	| algo validExpirationMonth expirationDateString|
 	algo _ TusLibrosSystem newWithEnvironment: self.
 	merchantProcessor _ MerchantProcessorMock new.
-	"todo: Según la especificación de la API, debe tomar como fecha algo asi como mmaaaa, esto valdrá también para este mensaje, o será lidiado con del otro lado de la interfaz?"
 	validExpirationMonth _ Month month: testObjectsFactory today monthIndex year: testObjectsFactory today yearNumber + 1.
-	
+	expirationDateString _ RestTest expirationMonthToString: validExpirationMonth.
 	self 
-		should: [ algo checkoutCart: 123 on: testObjectsFactory today withCreditCard: 1234 expiring: validExpirationMonth  belongingTo: 'alf'.  ] 
+		should: [ algo checkoutCart: 123 on: testObjectsFactory today withCreditCard: 1234 expiring: expirationDateString  belongingTo: 'alf'.  ] 
 		raise: Error - MessageNotUnderstood 
 		withExceptionDo: [:error | self assert: TusLibrosSystem invalidCartIdError equals: error messageText ].
 	
 	self deny: merchantProcessor performedDebit.
 	
 	
+	! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'RestTest class' category: #TusLibros!
+RestTest class
+	instanceVariableNames: ''!
+
+!RestTest class methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 09:18:34'!
+expirationMonthToString: aMonth 
+	|monthString yearString|
+	monthString := (aMonth monthIndex asString) padded: 'left' to: 2 with: $0 .
+	yearString := (aMonth yearNumber asString) padded: 'left' to: 4 with: $0.
+	^monthString, yearString
 	! !
 
 
@@ -891,13 +903,13 @@ addToCart: aCartId an: anISBN times: aQuantity
 	(self getCart: aCartId) add: aQuantity of: anISBN.
 		! !
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/18/2018 02:01:41'!
-checkoutCart: aCartId on: currentDate withCreditCard: aNumber expiring: anExpirationDate belongingTo: anOwner
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 09:23:52'!
+checkoutCart: aCartId on: currentDate withCreditCard: aNumber expiring: anExpirationDateString belongingTo: anOwner
 	| cashier |
 	
 	cashier _ Cashier 
 		toCheckout: (self getCart: aCartId) 
-		charging: (CreditCard expiringOn: anExpirationDate)
+		charging: (CreditCard expiringOn: (TusLibrosSystem expirationDateStringToDate: anExpirationDateString))
 		on: currentDate
 		registeringOn:  OrderedCollection new
 		with: environment merchantProcessor.
@@ -963,6 +975,16 @@ cannotCreateCartWithInvalidUserMessage
 !TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'PB 6/17/2018 23:06:43'!
 cannotCreateCartWithInvalidUsernameOrPassword
 	^ 'Cannot create cart with invalid username or password'.! !
+
+!TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 09:28:04'!
+expirationDateStringToDate: anExpirationDateString 
+	|digitsArray month year|
+	digitsArray:= (1 to: 2) collect: [:position | String with:(anExpirationDateString at: position)].
+	month := digitsArray fold: [:substring :newDigit | substring , newDigit].
+
+	digitsArray:= (3 to: 6) collect: [:position | String with:(anExpirationDateString at: position)].
+	year := digitsArray fold: [:substring :newDigit | substring, newDigit].
+	^Month month: month asNumber year: year asNumber! !
 
 !TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:24:58'!
 newWithEnvironment: anEnviroment
