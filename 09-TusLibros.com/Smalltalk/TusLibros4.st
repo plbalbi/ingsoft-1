@@ -309,23 +309,18 @@ validUser
 	^ 'PSANCHEZ'.! !
 
 
-!RestTest methodsFor: 'enviroment' stamp: 'PO 6/18/2018 13:26:22'!
-addCartToPurchasesOf: aString 
-	self shouldBeImplemented.! !
-
 !RestTest methodsFor: 'enviroment' stamp: 'PB 6/18/2018 00:20:39'!
 addNewCartWith: aCartId
 	carts at: aCartId put: (Cart acceptingItemsOf: catalog).
 	! !
 
-!RestTest methodsFor: 'enviroment' stamp: 'PB 6/17/2018 22:53:33'!
+!RestTest methodsFor: 'enviroment' stamp: 'po 6/18/2018 17:07:37'!
 getCart: aCartId
-	^carts at: aCartId
-	! !
+	^[carts at: aCartId] ifError: [self error: TusLibrosSystem invalidCartIdError ]! !
 
-!RestTest methodsFor: 'enviroment' stamp: 'PO 6/18/2018 13:13:52'!
+!RestTest methodsFor: 'enviroment' stamp: 'po 6/18/2018 17:10:08'!
 getCartOwner: aCartId 
-	^cartOwners at: aCartId! !
+	^[cartOwners at: aCartId] ifError: [self error: TusLibrosSystem invalidCartIdError ]! !
 
 !RestTest methodsFor: 'enviroment' stamp: 'po 6/18/2018 13:56:25'!
 getSalesBookForUser: anUsername 
@@ -505,7 +500,7 @@ test10CantCheckoutNonExistingCart
 	
 	! !
 
-!RestTest methodsFor: 'tests' stamp: 'po 6/18/2018 13:41:14'!
+!RestTest methodsFor: 'tests' stamp: 'po 6/18/2018 17:01:29'!
 test11ListPurchasesOfValidUsernameAndPassword
 	| algo validExpirationMonth expirationDateString|
 	algo _ TusLibrosSystem newWithEnvironment: self.
@@ -514,19 +509,22 @@ test11ListPurchasesOfValidUsernameAndPassword
 	validExpirationMonth _ Month month: testObjectsFactory today monthIndex year: testObjectsFactory today yearNumber + 1.
 	expirationDateString _ RestTest expirationMonthToString: validExpirationMonth.
 	carts add: 123->testObjectsFactory createCartWithItems.
-	cartOwners at: 123 put: 'alf'.
+	cartOwners at: 123 put: self validUser.
 	algo checkoutCart: 123 on: testObjectsFactory today withCreditCard: 1234 expiring: expirationDateString  belongingTo: 'alf'. 
 
 	carts add: 124->testObjectsFactory createCartWithItems.
-	cartOwners at: 124 put: 'alf'.
+	cartOwners at: 124 put: self validUser.
 	algo checkoutCart: 124 on: testObjectsFactory today withCreditCard: 1234 expiring: expirationDateString  belongingTo: 'alf'. 
+	self assert: (Array with: 128390 with: 10 with: 23148 with: 4 with: 180) equals: (algo listPurchasesFor: self validUser with: self validPassword)! !
 
-	self assert: (Array with: 23148 with: 1 with: 128390 with: 1 with: 24) equals: (algo listPurchasesFor: self validUser with: self validPassword)! !
 
-
-!RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 13:29:13'!
+!RestTest methodsFor: 'as yet unclassified' stamp: 'po 6/18/2018 16:57:47'!
 add: aCartId ToPurchasesOf: anUsername 
-	userPurchases at: anUsername put: aCartId! !
+	"Aca hay que hacer que sea un collection de cart ids"
+	| previousPurchases|
+	previousPurchases := userPurchases at: anUsername ifAbsent: [Bag new].
+	previousPurchases addAll: (self getCart: aCartId) listItems.
+	userPurchases at: anUsername put: previousPurchases.! !
 
 !RestTest methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 13:28:26'!
 addCartToUserPurchases: aCartId
@@ -538,13 +536,18 @@ addCartToUserPurchases: aCartId
 attach: anUsername toCart: aCartId 
 	cartOwners at: aCartId put: anUsername! !
 
-!RestTest methodsFor: 'as yet unclassified' stamp: 'po 6/18/2018 13:46:10'!
+!RestTest methodsFor: 'as yet unclassified' stamp: 'po 6/18/2018 16:40:55'!
 getPurchasedAmountOf: anUsername 
-	^userPurchasedAmount at: anUsername! !
+	^(self getSalesBookForUser: anUsername ) inject: 0 into: [:a :c | a + c total]  ! !
 
-!RestTest methodsFor: 'as yet unclassified' stamp: 'po 6/18/2018 13:44:54'!
+!RestTest methodsFor: 'as yet unclassified' stamp: 'po 6/18/2018 17:00:27'!
 getPurchasesOf: aUsername 
-	^[userPurchases at: aUsername] ifError: [^Dictionary new.]! !
+	|purchases arrayOfPurchases|
+	arrayOfPurchases := Array new.
+	purchases := userPurchases at: aUsername ifAbsent: [Array new].
+	purchases contents associationsDo: [:association | arrayOfPurchases := arrayOfPurchases, {association key}, {association value}].
+		
+	^arrayOfPurchases ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1013,7 +1016,7 @@ listCart: aCartId
 	^itemsList
 	! !
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/18/2018 12:51:14'!
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'po 6/18/2018 17:02:32'!
 listPurchasesFor: anUsername with: aPassword 
 	|purchases total|
 	(environment isValidWith: anUsername and: aPassword) 
@@ -1022,10 +1025,10 @@ listPurchasesFor: anUsername with: aPassword
 		
 		purchases := environment getPurchasesOf: anUsername.
 		total := environment getPurchasedAmountOf: anUsername.
-		^Array with: purchases with: total
+		^purchases , {total}
 	]
 	ifFalse: [
-		^self error: self class cannotListPurchasesWithInvalidUsernameOrPassword
+		self error: self class cannotListPurchasesWithInvalidUsernameOrPassword
 	]
 	! !
 
