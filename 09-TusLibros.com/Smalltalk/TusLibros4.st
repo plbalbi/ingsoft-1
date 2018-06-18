@@ -392,7 +392,7 @@ test04AddToCartAddsACart
 		times: 10.
 	self deny: cart isEmpty.! !
 
-!RestTest methodsFor: 'tests' stamp: 'PB 6/18/2018 00:36:48'!
+!RestTest methodsFor: 'tests' stamp: 'PB 6/18/2018 01:16:22'!
 test05CannotAddToCartIfCartDoesNotExist
 	| algo |
 	algo _ TusLibrosSystem newWithEnvironment: self.
@@ -405,7 +405,7 @@ test05CannotAddToCartIfCartDoesNotExist
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :error |
 			self
-				assert: TusLibrosSystem cannotAddItemToCartIfDoesNotExist
+				assert: TusLibrosSystem invalidCartIdError 
 				equals: error messageText ].! !
 
 !RestTest methodsFor: 'tests' stamp: 'PB 6/18/2018 00:47:09'!
@@ -844,12 +844,10 @@ Object subclass: #TusLibrosSystem
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/17/2018 22:57:48'!
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/18/2018 01:16:38'!
 addToCart: aCartId an: anISBN times: aQuantity
-	|cart|
-	[ cart := environment getCart: aCartId. ] 
-		ifError: [ self error: self class cannotAddItemToCartIfDoesNotExist ].
-	cart add: aQuantity of: anISBN.
+
+	(self getCart: aCartId) add: aQuantity of: anISBN.
 		! !
 
 !TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/17/2018 23:08:43'!
@@ -865,11 +863,14 @@ createCartFor: anUsername with: aPassword at: aTime
 
 	! !
 
-!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/18/2018 01:11:40'!
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/18/2018 01:14:16'!
+getCart: aCartId
+	^[ environment getCart: aCartId ] ifError: [self error: self class invalidCartIdError ].! !
+
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/18/2018 01:14:54'!
 listCart: aCartId 
-	| itemsList cart |
-	cart _  [ environment getCart: aCartId ] ifError: [self error: self class invalidCartIdError ].
-	itemsList _ cart listItems.
+	| itemsList |
+	itemsList _ (self getCart: aCartId) listItems.
 	(itemsList isEmpty) ifTrue: [self error: self class cannotListEmptyCartWarning].
 	^itemsList
 	! !
