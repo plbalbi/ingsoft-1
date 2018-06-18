@@ -276,15 +276,16 @@ test04MerchantProcessorChargesCorrectly
 
 !classDefinition: #RestTest category: #TusLibros!
 TestCase subclass: #RestTest
-	instanceVariableNames: 'testObjectsFactory carts'
+	instanceVariableNames: 'testObjectsFactory carts catalog'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!RestTest methodsFor: 'preparation' stamp: 'PO 6/14/2018 21:30:09'!
+!RestTest methodsFor: 'preparation' stamp: 'PB 6/18/2018 00:21:29'!
 setUp
 	testObjectsFactory _ StoreTestObjectsFactory new.
 	carts _ Dictionary new.
+	catalog _ testObjectsFactory defaultCatalog.
 ! !
 
 
@@ -305,9 +306,9 @@ validUser
 	^ 'PSANCHEZ'.! !
 
 
-!RestTest methodsFor: 'enviroment' stamp: 'PO 6/14/2018 21:31:26'!
+!RestTest methodsFor: 'enviroment' stamp: 'PB 6/18/2018 00:20:39'!
 addNewCartWith: aCartId
-	carts at: aCartId put: Cart new.
+	carts at: aCartId put: (Cart acceptingItemsOf: catalog).
 	! !
 
 !RestTest methodsFor: 'enviroment' stamp: 'PB 6/17/2018 22:53:33'!
@@ -379,41 +380,70 @@ test03CantCreateCartWIthValidUserAndInvalidPassword
 				equals: error messageText.
 			self deny: (self hasCartWith: createdCartId) ].! !
 
-!RestTest methodsFor: 'tests' stamp: 'PO 6/14/2018 21:40:57'!
-test04addToCartAddsACart
+!RestTest methodsFor: 'tests' stamp: 'PB 6/18/2018 00:36:38'!
+test04AddToCartAddsACart
 	| algo cart |
 	algo _ TusLibrosSystem newWithEnvironment: self.
 	cart _ testObjectsFactory createCart.
-	carts add: 123->cart.
-	
-	algo addToCart: 123 an: testObjectsFactory itemSellByTheStore times: 10.
-	self deny: cart isEmpty 
-	
-	
-	"
-	createdCartId _ algo
-				createCartFor: self validUser
-				with: self validPassword
-				at: timeOfCartCreation "! !
+	carts add: 123 -> cart.
+	algo
+		addToCart: 123
+		an: testObjectsFactory itemSellByTheStore
+		times: 10.
+	self deny: cart isEmpty.! !
 
-!RestTest methodsFor: 'tests' stamp: 'PO 6/14/2018 21:55:26'!
-test05cannotAddToCartIfCartDoesNotExist
+!RestTest methodsFor: 'tests' stamp: 'PB 6/18/2018 00:36:48'!
+test05CannotAddToCartIfCartDoesNotExist
+	| algo |
+	algo _ TusLibrosSystem newWithEnvironment: self.
+	self
+		should: [
+			algo
+				addToCart: 123
+				an: testObjectsFactory itemSellByTheStore
+				times: 10 ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :error |
+			self
+				assert: TusLibrosSystem cannotAddItemToCartIfDoesNotExist
+				equals: error messageText ].! !
+
+!RestTest methodsFor: 'tests' stamp: 'PB 6/18/2018 00:47:09'!
+test06AllItemInCartCanBeListedCorrectly
+	| algo cartWithItems |
+	algo _ TusLibrosSystem newWithEnvironment: self.
+	cartWithItems _ testObjectsFactory createCartWithItems.
+	carts add: 123 -> cartWithItems.
+	
+	self assert: (cartWithItems listItems) equals: (algo listCart: 123).
+	
+	! !
+
+!RestTest methodsFor: 'tests' stamp: 'PB 6/18/2018 01:04:58'!
+test07WarnWhenListingEmptyCart
+	| algo emptyCart |
+	algo _ TusLibrosSystem newWithEnvironment: self.
+	emptyCart _ testObjectsFactory createCart.
+	carts add: 123 -> emptyCart.
+	
+	self 
+		should: [ algo listCart: 123 ]  
+		raise:  Error - MessageNotUnderstood 
+		withExceptionDo: [ :error |
+			self assert: TusLibrosSystem cannotListEmptyCartWarning equals: error messageText.
+			]! !
+
+!RestTest methodsFor: 'tests' stamp: 'PB 6/18/2018 01:08:09'!
+test08CantListNonExistingCart
 	| algo |
 	algo _ TusLibrosSystem newWithEnvironment: self.
 	
-	self should: [
-		algo addToCart: 123 an: testObjectsFactory itemSellByTheStore times: 10.
-	]
-	raise: Error - MessageNotUnderstood
-	withExceptionDo:[:error |
-		self assert: TusLibrosSystem cannotAddItemToCartIfDoesNotExist equals: error messageText.
-	]	
-	
-	"
-	createdCartId _ algo
-				createCartFor: self validUser
-				with: self validPassword
-				at: timeOfCartCreation "! !
+	self 
+		should: [ algo listCart: 123 ]  
+		raise:  Error - MessageNotUnderstood 
+		withExceptionDo: [ :error |
+			self assert: TusLibrosSystem invalidCartIdError equals: error messageText.
+			]! !
 
 
 !classDefinition: #Cart category: #TusLibros!
@@ -492,6 +522,11 @@ add: aQuantity of: anItem
 	self assertIsValidItem: anItem.
 
 	1 to: aQuantity do: [ :aNumber | items add: anItem ]! !
+
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'PB 6/18/2018 00:51:18'!
+listItems
+	^items copy! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -740,11 +775,21 @@ createCart
 	
 	^Cart acceptingItemsOf: self defaultCatalog! !
 
-!StoreTestObjectsFactory methodsFor: 'cart' stamp: 'HernanWilkinson 6/17/2013 18:08'!
+!StoreTestObjectsFactory methodsFor: 'cart' stamp: 'PB 6/18/2018 00:54:06'!
+createCartWithItems
+	| cartWithItems |
+	
+	cartWithItems _ Cart acceptingItemsOf: self defaultCatalog.
+	cartWithItems add: 2 of: self itemSellByTheStore.
+	cartWithItems add: 5 of: self anotherItemSellByTheStore.
+	^cartWithItems ! !
+
+!StoreTestObjectsFactory methodsFor: 'cart' stamp: 'PB 6/18/2018 00:55:04'!
 defaultCatalog
 	
 	^ Dictionary new
 		at: self itemSellByTheStore put: self itemSellByTheStorePrice;
+		at: self anotherItemSellByTheStore put: self anotherItemSellByTheStore;
 		yourself ! !
 
 
@@ -771,15 +816,20 @@ notExpiredCreditCard
 	^CreditCard expiringOn: (Month month: today monthIndex year: today yearNumber + 1)! !
 
 
+!StoreTestObjectsFactory methodsFor: 'items' stamp: 'PB 6/18/2018 00:53:06'!
+anotherItemSellByTheStore
+	
+	^128390! !
+
 !StoreTestObjectsFactory methodsFor: 'items' stamp: 'HernanWilkinson 6/17/2013 18:08'!
 itemNotSellByTheStore
 	
 	^'invalidBook'! !
 
-!StoreTestObjectsFactory methodsFor: 'items' stamp: 'HernanWilkinson 6/17/2013 18:08'!
+!StoreTestObjectsFactory methodsFor: 'items' stamp: 'PB 6/18/2018 00:53:32'!
 itemSellByTheStore
 	
-	^ 'validBook'! !
+	^ 23148! !
 
 !StoreTestObjectsFactory methodsFor: 'items' stamp: 'HernanWilkinson 6/17/2013 18:08'!
 itemSellByTheStorePrice
@@ -815,6 +865,15 @@ createCartFor: anUsername with: aPassword at: aTime
 
 	! !
 
+!TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PB 6/18/2018 01:11:40'!
+listCart: aCartId 
+	| itemsList cart |
+	cart _  [ environment getCart: aCartId ] ifError: [self error: self class invalidCartIdError ].
+	itemsList _ cart listItems.
+	(itemsList isEmpty) ifTrue: [self error: self class cannotListEmptyCartWarning].
+	^itemsList
+	! !
+
 !TusLibrosSystem methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:24:39'!
 withEnvironment: anEnvironment
 	environment _ anEnvironment.! !
@@ -840,3 +899,12 @@ cannotCreateCartWithInvalidUsernameOrPassword
 !TusLibrosSystem class methodsFor: 'as yet unclassified' stamp: 'PO 6/14/2018 20:24:58'!
 newWithEnvironment: anEnviroment
 	^ self new withEnvironment: anEnviroment.! !
+
+
+!TusLibrosSystem class methodsFor: 'error messages' stamp: 'PB 6/18/2018 01:02:56'!
+cannotListEmptyCartWarning
+	^'Cannot list cart without items'! !
+
+!TusLibrosSystem class methodsFor: 'error messages' stamp: 'PB 6/18/2018 01:08:29'!
+invalidCartIdError
+	^'Invalid cart id provided'! !
